@@ -54,7 +54,7 @@ html, body, #root {
 /* ---------- Komponen tema ---------- */
 @layer components {
   .eyebrow { font-family: "Space Mono", monospace; font-size: .8rem; letter-spacing: .08em; text-transform: uppercase; color: var(--flash); }
-  .display-hero { font-family: Fredoka, "Plus Jakarta Sans Variable", sans-serif; font-weight: 700; font-style: italic; line-height: 1.02; }
+  .display-hero { font-family: "Fraunces Variable", Georgia, serif; font-weight: 500; font-style: normal; line-height: 1.02; }
   .display-h2 { font-weight: 800; font-style: italic; font-size: clamp(1.5rem, 4vw, 2.4rem); line-height: 1.1; }
   .display-h3 { font-weight: 700; font-style: italic; font-size: clamp(1.15rem, 3vw, 1.6rem); line-height: 1.15; }
 
@@ -304,7 +304,7 @@ html, body, #root {
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     box-shadow: var(--pop-shadow); border: 3px solid var(--ink);
   }
-  .step-badge__num { font-family: Fredoka, sans-serif; font-weight: 800; font-size: 1.4rem; line-height: 1; }
+  .step-badge__num { font-family: "Fraunces Variable", Georgia, serif; font-weight: 800; font-size: 1.4rem; line-height: 1; }
   .step-badge__timer { font-family: "Space Mono", monospace; font-size: .75rem; margin-top: 2px; }
 
   /* Bingkai film (lubang film di kiri-kanan) untuk kamera */
@@ -359,3 +359,90 @@ textarea:not([readonly]) {
 @keyframes rl-dot { 0%, 100% { transform: scale(.6); opacity: .45; } 50% { transform: scale(1.25); opacity: 1; } }
 @keyframes rl-ring { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
 .rl-hide > *:not(.rl-overlay) { visibility: hidden; }
+
+
+/* ==========================================================
+   TEMA "ELEGAN" — sederhana, hangat, berkelas.
+   Arang hangat + koral lembut + krem. Judul serif (Fraunces), isi sans (Plus Jakarta). Tanpa miring, tanpa garis hitam tebal.
+   Ditaruh di akhir & di luar @layer supaya menimpa gaya lama tanpa mengubah tiap layar.
+   Warna utama/tombol/permukaan tetap bisa diganti admin (Pengaturan > Tampilan).
+   ========================================================== */
+:root {
+  --pop-pink: 255 95 69;     /* koral  — tombol utama */
+  --pop-purple: 31 34 43;    /* permukaan gelap */
+  --pop-dark: 20 22 27;      /* arang  — tinta & latar */
+  --pop-on-pink: 20 22 27;   /* tinta di atas koral (kontras tinggi) */
+  --flash: #F6C9A8;          /* champagne — aksen halus */
+  --flash-ink: #20150F;
+  --cream: #F6F1EA;
+  --hair: rgba(246, 241, 234, 0.16);
+  --serif: "Fraunces Variable", Georgia, "Times New Roman", serif;
+}
+.kiosk-root {
+  background:
+    radial-gradient(120% 90% at 88% -6%, rgba(255, 95, 69, 0.16), transparent 55%),
+    radial-gradient(90% 70% at 0% 104%, rgba(246, 201, 168, 0.07), transparent 60%),
+    linear-gradient(180deg, #1D2028 0%, #101216 100%);
+  color: var(--cream);
+}
+.kiosk-screen { color: var(--cream); }
+.kiosk-root *:not(svg *) { font-style: normal; }
+.display-hero, .serif { font-family: var(--serif); font-style: normal; font-weight: 500; letter-spacing: -0.015em; line-height: 1.05; }
+.eyebrow { font-family: "Plus Jakarta Sans Variable", system-ui, sans-serif; color: var(--flash); letter-spacing: .38em; font-weight: 700; padding-left: .38em; }
+
+/* Panel kaca gelap, baki krem, tombol koral */
+.strip-panel {
+  background: rgba(246, 241, 234, 0.055); border: 1px solid var(--hair);
+  box-shadow: 0 calc(var(--u) * 30) calc(var(--u) * 80) rgba(0, 0, 0, 0.45); backdrop-filter: blur(14px);
+}
+.strip-tray { background: var(--cream); border: 0; box-shadow: 0 calc(var(--u) * 16) calc(var(--u) * 50) rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(20, 22, 27, 0.06); }
+.strip-card.is-picked { outline: calc(var(--u) * 4) solid var(--red); outline-offset: calc(var(--u) * 6); }
+.strip-price { color: #14161B; font-family: "Plus Jakarta Sans Variable", system-ui, sans-serif; font-weight: 700; letter-spacing: .02em; }
+.strip-tab { border: 1px solid var(--hair); background: rgba(246, 241, 234, 0.07); color: var(--cream); font-weight: 600; letter-spacing: .04em; }
+.strip-tab--title { background: var(--red); color: rgb(var(--pop-on-pink)); border-color: transparent; font-weight: 700; }
+.strip-tab--sub { background: rgba(246, 241, 234, 0.08); color: var(--cream); }
+.strip-btn {
+  background: var(--red); color: rgb(var(--pop-on-pink)); border: 0; font-weight: 700; letter-spacing: .01em;
+  box-shadow: 0 calc(var(--u) * 12) calc(var(--u) * 34) rgba(255, 95, 69, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+.strip-btn:active { transform: scale(.97); }
+.strip-btn--next { background: var(--cream); color: #14161B; box-shadow: 0 calc(var(--u) * 10) calc(var(--u) * 30) rgba(0, 0, 0, 0.35); }
+.strip-btn--back {
+  background: rgba(246, 241, 234, 0.08); color: var(--cream); border: 1px solid var(--hair);
+  box-shadow: none; backdrop-filter: blur(8px); letter-spacing: .02em;
+}
+.strip-btn--back:active { transform: scale(.97); box-shadow: none; }
+.strip-btn__icon { background: var(--red); color: rgb(var(--pop-on-pink)); border: 0; }
+.btn-back { background: rgba(246, 241, 234, 0.1); border: 1px solid var(--hair); color: var(--cream); box-shadow: none; font-style: normal; }
+.btn-back:active { transform: scale(.97); box-shadow: none; }
+.pill { font-family: "Plus Jakarta Sans Variable", system-ui, sans-serif; background: var(--red); color: rgb(var(--pop-on-pink)); border: 0; box-shadow: none; letter-spacing: .04em; }
+.notice-clock { background: var(--cream); border: 0; box-shadow: 0 calc(var(--u) * 8) calc(var(--u) * 24) rgba(0, 0, 0, 0.3); }
+.notice-title { font-family: var(--serif); font-weight: 500; font-style: normal; color: #14161B; }
+.pay-title, .pay-price, .pay-amount { font-family: var(--serif); font-weight: 500; font-style: normal; color: var(--cream); text-shadow: none; }
+.pay-error { color: #FFB4A6; text-shadow: none; }
+.step-badge__num { font-family: var(--serif); font-weight: 600; }
+
+/* Gerak halus: cincin napas di tombol Mulai */
+@keyframes startBreath { 0% { transform: scale(1); opacity: .55; } 70%, 100% { transform: scale(1.35); opacity: 0; } }
+.start-cta { position: absolute; display: inline-flex; align-items: center; justify-content: center; gap: calc(var(--u) * 18); border: 0; cursor: pointer;
+  background: var(--red); color: rgb(var(--pop-on-pink)); font-family: var(--serif); font-weight: 600; letter-spacing: .01em; border-radius: 9999px;
+  box-shadow: 0 calc(var(--u) * 18) calc(var(--u) * 50) rgba(255, 95, 69, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.4); transition: transform .12s ease; }
+.start-cta::before { content: ""; position: absolute; inset: 0; border-radius: inherit; border: 2px solid var(--red); animation: startBreath 2.6s ease-out infinite; pointer-events: none; }
+.start-cta:active { transform: scale(.97); }
+.start-cta:disabled { opacity: .45; }
+.start-cta:disabled::before { animation: none; }
+@media (prefers-reduced-motion: reduce) { .start-cta::before { animation: none; } }
+
+/* Kartu tipe template & kartu metode bayar: kaca gelap + garis tipis (gantinya koral bertekstur) */
+.type-card, .pay-card {
+  background: linear-gradient(180deg, rgba(246, 241, 234, 0.11), rgba(246, 241, 234, 0.04)); color: var(--cream);
+  border: 1px solid var(--hair); box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4); backdrop-filter: blur(10px);
+  transition: transform .15s ease, border-color .15s ease, background .15s ease;
+}
+.type-card::before, .pay-card::before { display: none; }
+.type-card:active, .pay-card:active { border-color: var(--red); background: rgba(255, 95, 69, 0.16); }
+.type-card__label, .pay-card__label { background: transparent; border: 1px solid var(--hair); color: var(--cream); font-style: normal; font-weight: 600; letter-spacing: .05em; }
+
+/* Perbaikan: panel kaca ber-sudut bulat; tab keterangan krem (teks gelap) supaya terbaca di atas baki krem */
+.strip-panel { border-radius: calc(var(--u) * 56); }
+.strip-tab--sub { background: var(--cream); color: #14161B; border-color: transparent; font-weight: 600; }

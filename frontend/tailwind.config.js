@@ -10,16 +10,16 @@ export default {
           pink: "rgb(var(--pop-pink) / <alpha-value>)",     // warna utama (tombol) — default merah PopSnap
           purple: "rgb(var(--pop-purple) / <alpha-value>)", // warna sekunder (latar) — default biru PopSnap
           dark: "rgb(var(--pop-dark) / <alpha-value>)",     // warna tinta (teks gelap, modal)
-          flash: "#FFD23F",
-          "flash-ink": "#3A2E00",
-          paper: "#F4F7FA",
+          flash: "#F6C9A8",
+          "flash-ink": "#20150F",
+          paper: "#F6F1EA",
           teal: "#1FA997",
           coral: "#FF5D73",
         },
       },
       fontFamily: {
         sans: ['"Plus Jakarta Sans Variable"', "system-ui", "sans-serif"],
-        display: ["Fredoka", '"Plus Jakarta Sans Variable"', "system-ui", "sans-serif"],
+        display: ['"Fraunces Variable"', "Georgia", "serif"],
         mono: ['"Space Mono"', "ui-monospace", "monospace"],
       },
       boxShadow: {

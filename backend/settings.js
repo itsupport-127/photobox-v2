@@ -97,7 +97,7 @@ const DEFAULTS = {
   display: {
     autoFullscreen: true,   // klik Start / tombol layar penuh = masuk layar penuh (seperti F11)
     startFullscreen: true,  // aplikasi desktop (.exe) dibuka dalam layar penuh
-    colors: { background: "#181B23", primary: "#E02843", buttonText: "#FFFFFF", secondary: "#4082AE" }, // tema PopSnap: tinta / merah / putih / biru
+    colors: { background: "#14161B", primary: "#FF5F45", buttonText: "#14161B", secondary: "#1F222B" }, // tema Elegan: arang / koral / tinta (teks tombol) / permukaan
     startScreen: {
       image: "", stretch: "cover", // cover | contain | fill | center
       templateChoice: "favorites", // favorites (hanya template favorit/live yang tampil; sisanya Draft) | single
@@ -222,6 +222,9 @@ function load() {
     cache.display.colors = { ...DEFAULTS.display.colors };
     persist();
   }
+  // Migrasi tema Elegan: palet bawaan PopSnap sebelumnya (merah/biru) diganti palet baru. Warna kustom admin tidak disentuh.
+  const pc = cache.display?.colors, PREV = { background: "#181B23", primary: "#E02843", buttonText: "#FFFFFF", secondary: "#4082AE" };
+  if (pc && Object.keys(PREV).every((k) => String(pc[k] ?? "").toUpperCase() === PREV[k])) { cache.display.colors = { ...DEFAULTS.display.colors }; persist(); }
   // Migrasi: teks bawaan lama "Photobox Serba Bisa" dihapus dari layar Start
   if (cache.event?.subtitle === "Photobox Serba Bisa") { cache.event.subtitle = ""; persist(); }
   // Migrasi: opsi "semua template" dihapus (hanya template Live/favorit yang tampil di booth)

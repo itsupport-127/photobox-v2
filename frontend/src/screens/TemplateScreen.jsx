@@ -148,9 +148,9 @@ function TemplateList({ session, dispatch, templates, category, skipCategory }) 
           {!skipCategory && hint && <span className="strip-tab strip-tab--sub" style={{ height: U(45), marginLeft: U(-104), padding: `0 ${U(21)} 0 ${U(120)}`, fontSize: U(26) }}>{hint}</span>}
         </div>
 
-        <button onClick={() => dispatch({ type: skipCategory ? "CANCEL_SESSION" : "BACK_TO_CATEGORY" })} className="strip-btn" style={{ left: U(L.back.left), top: U(L.back.top), width: U(192), height: U(63), fontSize: U(30) }}>BACK</button>
+        <button onClick={() => dispatch({ type: skipCategory ? "CANCEL_SESSION" : "BACK_TO_CATEGORY" })} className="strip-btn strip-btn--back" style={{ left: U(L.back.left), top: U(L.back.top), width: U(192), height: U(63), fontSize: U(30), padding: 0 }}>Kembali</button>
         {selectedTemplate && (
-          <button onClick={() => dispatch({ type: "GO_TO_PAYMENT" })} className="strip-btn strip-btn--next" style={{ left: U(L.next.left), top: U(L.next.top), width: U(192), height: U(63), fontSize: U(30) }}>NEXT →</button>
+          <button onClick={() => dispatch({ type: "GO_TO_PAYMENT" })} className="strip-btn strip-btn--next" style={{ left: U(L.next.left), top: U(L.next.top), width: U(192), height: U(63), fontSize: U(30) }}>Lanjut →</button>
         )}
       </div>
     </div>
