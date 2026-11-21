@@ -1,7 +1,7 @@
 // Uji: pembersihan sesi kedaluwarsa (jalan setelah start, tahan file terkunci), pembersih file yatim (tidak menyentuh file sesi / file baru),
 // ringkasan penyimpanan & hapus arsip lama.   node test/storage.js
 const os = require("os"), fs = require("fs"), path = require("path"), assert = require("assert"), { spawn } = require("child_process");
-const DATA = fs.mkdtempSync(path.join(os.tmpdir(), "booth-")); process.env.POPSNAP_DATA = DATA;
+const DATA = fs.mkdtempSync(path.join(os.tmpdir(), "booth-")); process.env.WENEVA_DATA = DATA;
 const OUT = path.join(DATA, "output"); process.env.OUTPUT_DIR = OUT;
 
 (async () => {
@@ -23,7 +23,7 @@ const OUT = path.join(DATA, "output"); process.env.OUTPUT_DIR = OUT;
   db.close?.();
 
   const PORT = 4900 + Math.floor(Math.random() * 100), B = `http://127.0.0.1:${PORT}`;
-  const srv = spawn(process.execPath, [path.join(__dirname, "..", "server.js")], { env: { ...process.env, PORT: String(PORT), POPSNAP_DATA: DATA, OUTPUT_DIR: OUT }, stdio: ["ignore", "pipe", "pipe"] });
+  const srv = spawn(process.execPath, [path.join(__dirname, "..", "server.js")], { env: { ...process.env, PORT: String(PORT), WENEVA_DATA: DATA, OUTPUT_DIR: OUT }, stdio: ["ignore", "pipe", "pipe"] });
   let log = ""; srv.stdout.on("data", (d) => (log += d)); srv.stderr.on("data", (d) => (log += d));
   const done = (c) => { srv.kill(); process.exit(c); };
   const j = async (u, body, tok) => { const r = await fetch(B + u, { method: body ? "POST" : "GET", headers: { "Content-Type": "application/json", ...(tok ? { Authorization: "Bearer " + tok } : {}) }, body: body ? JSON.stringify(body) : undefined }); return { status: r.status, body: await r.json().catch(() => ({})) }; };

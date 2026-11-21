@@ -1,7 +1,7 @@
 {
   "format": "popsnap-library-settings",
   "version": 1,
-  "savedAt": "2026-11-17T08:39:53.910Z",
+  "savedAt": "2026-11-21T05:23:17.811Z",
   "settings": {
     "event": {
       "name": "POPSNAP",
@@ -50,6 +50,19 @@
         "gifs": true,
         "videos": true
       }
+    },
+    "email": {
+      "enabled": false,
+      "host": "",
+      "port": 587,
+      "secure": false,
+      "user": "",
+      "pass": "",
+      "from": "",
+      "subject": "Foto kamu dari {event} sudah siap",
+      "intro": "Terima kasih sudah berfoto! Foto kamu bisa diunduh lewat tombol di bawah. Tautan aktif selama 48 jam, setelah itu foto dihapus otomatis.",
+      "askText": "Masukkan email untuk menerima foto kamu",
+      "seconds": 60
     },
     "printing": {
       "enabled": true,
@@ -208,10 +221,10 @@
       "autoFullscreen": true,
       "startFullscreen": true,
       "colors": {
-        "background": "#181B23",
-        "primary": "#E02843",
-        "buttonText": "#FFFFFF",
-        "secondary": "#4082AE"
+        "background": "#17171A",
+        "primary": "#FF5F45",
+        "buttonText": "#17171A",
+        "secondary": "#FFFDF9"
       },
       "startScreen": {
         "image": "",
@@ -243,14 +256,14 @@
         "iconsLocation": "right",
         "showLabels": true,
         "offline": "auto",
-        "offlineText": "Koneksi internet sedang terputus. Foto Anda akan dikirim oleh tim kami lewat WhatsApp.",
+        "offlineText": "Koneksi internet sedang terputus, jadi tautan unduh foto belum tersedia.",
         "thanksOn": true,
         "thanksLang": "id",
         "thanksTitle": "Terima kasih telah berfoto di Popsnap",
         "thanksText": "Semoga harimu menyenangkan. Sampai jumpa kembali.",
         "thanksTitleEn": "Thank you for taking photos at Popsnap",
         "thanksTextEn": "Have a great day. See you again soon.",
-        "offlineTextEn": "Internet connection is down. Your photos will be sent to you via WhatsApp."
+        "offlineTextEn": "Internet connection is down, so the download link is not available yet."
       },
       "lock": {
         "position": "top-right",

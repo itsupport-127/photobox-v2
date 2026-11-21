@@ -30,9 +30,9 @@ export default function ScrollButtons({ scrollRef, up, down, track, size = 52, d
   const go = (dir) => { const el = scrollRef.current; if (el) el.scrollBy({ top: dir * el.clientHeight * 0.8, behavior: "smooth" }); };
   const btn = (dir, pos, enabled, Icon, label) => (
     <button type="button" aria-label={label} disabled={!enabled} onClick={() => go(dir)}
-      style={{ left: U(pos.left), top: U(pos.top), width: U(size), height: U(size), padding: 0, borderRadius: "50%", background: "#E02843", border: "1px solid #000",
+      style={{ left: U(pos.left), top: U(pos.top), width: U(size), height: U(size), padding: 0, borderRadius: "50%", background: "#FF5F45", border: "1px solid rgba(23,23,26,.14)",
         display: "flex", alignItems: "center", justifyContent: "center", opacity: enabled ? 1 : 0.3, boxShadow: "0 2px 4px rgba(0,0,0,.25)", touchAction: "manipulation" }}>
-      <Icon color="#fff" strokeWidth={3.4} style={{ width: U(size * 0.6), height: U(size * 0.6) }} />
+      <Icon color="#17171A" strokeWidth={3.4} style={{ width: U(size * 0.6), height: U(size * 0.6) }} />
     </button>
   );
   return (
@@ -41,7 +41,7 @@ export default function ScrollButtons({ scrollRef, up, down, track, size = 52, d
       {btn(1, down, st.canDown, ChevronDown, "Gulung ke bawah")}
       {track && (
         <div aria-hidden="true" style={{ left: U(track.left), top: U(track.top), width: U(8), height: U(track.height), borderRadius: 9999, background: "#D9D9D9", pointerEvents: "none" }}>
-          <div style={{ position: "absolute", left: 0, width: "100%", borderRadius: 9999, background: "#E02843",
+          <div style={{ position: "absolute", left: 0, width: "100%", borderRadius: 9999, background: "#FF5F45",
             height: `${Math.max(st.thumb, 0.12) * 100}%`, top: `${st.pos * (1 - Math.max(st.thumb, 0.12)) * 100}%` }} />
         </div>
       )}

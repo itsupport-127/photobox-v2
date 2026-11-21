@@ -1,5 +1,5 @@
 import Backdrop from "../components/Backdrop";
-import logo from "../assets/logo-popsnap.png";
+import logo from "../assets/logo-weneva.png";
 import React, { useEffect, useState } from "react";
 import { getAuthStatus, setupFirstAdmin, login } from "../services/authService";
 
@@ -59,7 +59,7 @@ export default function LoginScreen({ onAuthenticated }) {
   return (
     <div className="kiosk-root h-screen w-screen flex flex-col items-center justify-center p-4 overflow-y-auto">
       <Backdrop />
-      <img src={logo} alt="PopSnap" draggable={false} className="relative z-10 w-[min(260px,60vw)] h-auto mb-4 select-none" />
+      <img src={logo} alt="Weneva" draggable={false} className="relative z-10 w-[min(260px,60vw)] h-auto mb-4 select-none" />
       <form onSubmit={handleSubmit} className="modal-card relative z-10 p-6 sm:p-8 w-full max-w-sm flex flex-col gap-4">
         <h1 className="display-h3 text-center">
           {needsSetup ? "Setup Akun Super Admin" : "Login Admin / Kasir"}
@@ -74,7 +74,7 @@ export default function LoginScreen({ onAuthenticated }) {
           <label className="flex flex-col gap-1 text-sm">
             Nama Toko
             <input type="text" value={storeName} onChange={(e) => setStoreName(e.target.value)}
-              placeholder="Misal: POPSNAP Malioboro" className="border-2 border-[#C7D0DA] focus:border-[#4082AE] outline-none rounded-xl px-3 py-2" />
+              placeholder="Misal: WENEVA Malioboro" className="border-2 border-[#C7D0DA] focus:border-[#4082AE] outline-none rounded-xl px-3 py-2" />
           </label>
         )}
 

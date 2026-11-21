@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { shapeOf } from "../hooks/useShape";
 import TemplateDecor from "./TemplateDecor";
-import logo from "../assets/logo-popsnap.png";
+import logo from "../assets/logo-weneva.png";
 
 /** Isi teks pengingat: {shots}, {retakes}, {frames}, {seconds} diganti angka sebenarnya. */
 export function fillReminder(text, vars) {
@@ -26,7 +26,7 @@ export const fmtReminderTimer = (sec) => `${String(Math.floor(sec / 60)).padStar
 
 /**
  * Tampilan layar pengingat (dipakai layar booth DAN pratinjau di Admin) — desain "Scan Here / pengingat".
- * Tanpa gambar latar unggahan admin: latar bertekstur + dekorasi + logo PopSnap bawaan.
+ * Tanpa gambar latar unggahan admin: latar bertekstur + dekorasi + logo Weneva bawaan.
  * `timerText` = isi pil hitung mundur (opsional), `hint` = tulisan kecil di bawahnya (opsional).
  */
 export default function ReminderView({ reminder, items, vars, timerText, hint, className = "" }) {

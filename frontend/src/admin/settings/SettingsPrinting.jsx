@@ -294,7 +294,7 @@ export default function SettingsPrinting({ s, set, only }) {
         <Row label="Pilihan salinan" hint="Jumlah salinan maksimum yang bisa dipilih tamu setelah menekan PRINT (1–9)."><N value={pr.copies} min={1} onCommit={(x) => set(["printing", "copies"], Math.min(9, x))} /></Row>
         <Row label="Ketajaman cetak" hint="Mempertajam gambar akhir sebelum dicetak."><Select value={pr.sharpening} onChange={(x) => set(["printing", "sharpening"], x)} options={[["none", "Tidak ada"], ["low", "Rendah"], ["medium", "Sedang"], ["high", "Tinggi"]]} /></Row>
         <Row label="Cetak 2x6"><Check checked={pr.strip2x6} onChange={(x) => set(["printing", "strip2x6"], x)} label="Template strip 2x6 dicetak dobel berdampingan di kertas 4x6 (lalu dipotong jadi dua)" /></Row>
-        <Notice tone="info">Cetak diam-diam (tanpa dialog) hanya jalan di aplikasi desktop POPSNAP. Tombol Simpan di bawah berlaku untuk semua pengaturan di tab ini.</Notice>
+        <Notice tone="info">Cetak diam-diam (tanpa dialog) hanya jalan di aplikasi desktop WENEVA. Tombol Simpan di bawah berlaku untuk semua pengaturan di tab ini.</Notice>
       </Card>)}
     </>
   );

@@ -616,7 +616,7 @@ export default function TemplateSlotEditor({ currentUser, onLogout }) {
     // 1) Dialog "Simpan sebagai" DULU (hanya boleh dibuka tepat saat klik), baru pekerjaan berat.
     let target;
     try {
-      target = await chooseSaveTarget(exportFileName(docRef.current.meta), { description: "Template POPSNAP / dslrBooth (ZIP)", mime: "application/zip", ext: ".zip", idKey: "popsnap-templates" });
+      target = await chooseSaveTarget(exportFileName(docRef.current.meta), { description: "Template WENEVA / dslrBooth (ZIP)", mime: "application/zip", ext: ".zip", idKey: "weneva-templates" });
     } catch (err) {
       return alert(err.message || "Tidak bisa membuka dialog simpan.");
     }
@@ -637,7 +637,7 @@ export default function TemplateSlotEditor({ currentUser, onLogout }) {
   // Tombol Import: dialog pilih file bawaan sistem (Chrome/Edge mengingat folder terakhir). Browser tanpa API itu
   // memakai <input type="file"> tersembunyi, yang juga membuka dialog pilih file.
   async function handleImportClick() {
-    const picked = await chooseOpenFile({ description: "Template (ZIP dslrBooth / POPSNAP, atau JSON)", accept: { "application/zip": [".zip"], "application/json": [".json"] }, idKey: "popsnap-templates" });
+    const picked = await chooseOpenFile({ description: "Template (ZIP dslrBooth / WENEVA, atau JSON)", accept: { "application/zip": [".zip"], "application/json": [".json"] }, idKey: "weneva-templates" });
     if (picked === undefined) return importInputRef.current.click();
     if (picked) await importFromFile(picked);
   }

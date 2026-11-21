@@ -19,6 +19,25 @@ const dslrBridge = require("./dslrBridge");
 const printer = require("./printer");
 
 const isDev = !app.isPackaged;
+
+// ---- Ganti nama ke WENEVA tanpa menghilangkan data booth lama ----
+// 1) Variabel lingkungan lama POPSNAP_* tetap dibaca (disalin ke WENEVA_*).
+for (const k of Object.keys(process.env)) {
+  if (k.startsWith("POPSNAP_") && process.env["WENEVA_" + k.slice(8)] === undefined) process.env["WENEVA_" + k.slice(8)] = process.env[k];
+}
+// 2) Folder data aplikasi (database, pengaturan, arsip) ikut nama aplikasi. Booth yang sudah terpasang memakai nama lama,
+//    jadi folder lama dipertahankan (ditandai supaya tidak berpindah sendiri). Instalasi baru memakai nama baru.
+try {
+  const base = app.getPath("appData"), has = (n) => fs.existsSync(path.join(base, n));
+  const NEW = ["WENEVA", "weneva-desktop"], OLD = ["POPSNAP", "popsnap-desktop"];
+  const old = OLD.find(has);
+  if (old && (fs.existsSync(path.join(base, old, ".weneva-pinned")) || !NEW.some(has))) {
+    app.setPath("userData", path.join(base, old));
+    try { fs.writeFileSync(path.join(base, old, ".weneva-pinned"), "folder data lama dipertahankan oleh WENEVA\n"); } catch { /* abaikan */ }
+  }
+} catch { /* abaikan */ }
+// 3) Folder hasil foto & pustaka: pakai yang lama bila sudah ada dan yang baru belum ada.
+const pickDir = (base, neu, old) => (fs.existsSync(path.join(base, old)) && !fs.existsSync(path.join(base, neu)) ? path.join(base, old) : path.join(base, neu));
 // Saat development: load dari Vite dev server (npm run dev di folder frontend)
 // Saat production (packaged): load dari file hasil build (frontend/dist)
 const FRONTEND_DEV_URL = "http://localhost:5173";
@@ -48,7 +67,7 @@ let backendRestarts = 0;
 let backendStartedAt = 0;
 
 // ---- Pemantau otomatis ----
-// Log kejadian aplikasi (selain backend.log): <AppData>/POPSNAP/app.log. Dikirim ke IT kalau booth bermasalah.
+// Log kejadian aplikasi (selain backend.log): <AppData>/WENEVA/app.log. Dikirim ke IT kalau booth bermasalah.
 function appLog(line) {
   try {
     const f = path.join(app.getPath("userData"), "app.log");
@@ -76,9 +95,9 @@ function startBackend() {
     env: {
       ...process.env,
       ELECTRON_RUN_AS_NODE: "1",
-      POPSNAP_DATA: dataDir,
-      OUTPUT_DIR: process.env.OUTPUT_DIR || path.join(app.getPath("documents"), "POPSNAP-Photos"),
-      POPSNAP_LIBRARY: process.env.POPSNAP_LIBRARY || path.join(app.getPath("pictures"), "POPSNAP"), // folder Settings + Templates (seperti dslrBooth)
+      WENEVA_DATA: dataDir,
+      OUTPUT_DIR: process.env.OUTPUT_DIR || pickDir(app.getPath("documents"), "WENEVA-Photos", "POPSNAP-Photos"),
+      WENEVA_LIBRARY: process.env.WENEVA_LIBRARY || pickDir(app.getPath("pictures"), "WENEVA", "POPSNAP"), // folder Settings + Templates (seperti dslrBooth)
     },
   });
 
@@ -88,12 +107,12 @@ function startBackend() {
   backendStartedAt = startedAt;
   backendProcess.stdout.on("data", (data) => { console.log(`[backend] ${data}`); log(String(data)); });
   backendProcess.stderr.on("data", (data) => { console.error(`[backend] ${data}`); log(String(data)); lastErr = (lastErr + data).slice(-1500); });
-  backendProcess.on("error", (err) => { log(`spawn error: ${err.message}\n`); dialog.showErrorBox("POPSNAP: backend gagal dijalankan", `${err.message}\n\nLog: ${logFile}`); });
+  backendProcess.on("error", (err) => { log(`spawn error: ${err.message}\n`); dialog.showErrorBox("WENEVA: backend gagal dijalankan", `${err.message}\n\nLog: ${logFile}`); });
   backendProcess.on("exit", (code) => {
     log(`Proses berhenti, kode: ${code}\n`);
     if (quitting) return;
     if (Date.now() - startedAt < 20000) {
-      dialog.showErrorBox("POPSNAP: backend berhenti saat dinyalakan", `${lastErr.trim() || "Tidak ada pesan error."}\n\nLog lengkap: ${logFile}`);
+      dialog.showErrorBox("WENEVA: backend berhenti saat dinyalakan", `${lastErr.trim() || "Tidak ada pesan error."}\n\nLog lengkap: ${logFile}`);
       return;
     }
     // Backend mati di tengah jalan (mis. error tak terduga): nyalakan lagi otomatis supaya booth tidak "mati" (maks 5x berturut-turut;
@@ -170,9 +189,9 @@ function createTray() {
   let img = nativeImage.createFromPath(iconPath);
   if (!img.isEmpty()) img = img.resize({ width: 32, height: 32 });
   tray = new Tray(img);
-  tray.setToolTip("POPSNAP Photobox");
+  tray.setToolTip("WENEVA Photobox");
   tray.setContextMenu(Menu.buildFromTemplate([
-    { label: "Tampilkan POPSNAP", click: showWindow },
+    { label: "Tampilkan WENEVA", click: showWindow },
     { type: "separator" },
     // Keluar sungguhan dari tray: tanpa PIN (PIN sudah dilalui saat menyembunyikan dari mode booth)
     { label: "Keluar", click: () => { allowClose = true; app.quit(); } },
@@ -240,7 +259,7 @@ function createWindow() {
       mainWindow.hide();
       if (!trayHintShown) {
         trayHintShown = true;
-        try { tray.displayBalloon({ title: "POPSNAP masih berjalan", content: "Klik ikon POPSNAP di dekat jam untuk membuka lagi, atau klik kanan > Keluar." }); } catch { /* bukan Windows */ }
+        try { tray.displayBalloon({ title: "WENEVA masih berjalan", content: "Klik ikon WENEVA di dekat jam untuk membuka lagi, atau klik kanan > Keluar." }); } catch { /* bukan Windows */ }
       }
     };
     mainWindow.on("close", (e) => {
@@ -248,7 +267,7 @@ function createWindow() {
       e.preventDefault();
       const locked = mainWindow.isFullScreen(); // PIN hanya di mode booth (layar penuh); jendela biasa / maximize biasa = langsung ke tray
       if (!locked) { hideToTray(); return; }
-      guard("PIN untuk menyembunyikan POPSNAP ke tray").then((ok) => { if (ok) hideToTray(); });
+      guard("PIN untuk menyembunyikan WENEVA ke tray").then((ok) => { if (ok) hideToTray(); });
     });
     // Keamanan: halaman tidak boleh pindah ke alamat luar / membuka jendela baru
     mainWindow.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
@@ -283,7 +302,7 @@ function createWindow() {
   }
 }
 
-// Hanya satu POPSNAP yang boleh jalan (dua backend akan berebut port 4000 & kamera)
+// Hanya satu WENEVA yang boleh jalan (dua backend akan berebut port 4000 & kamera)
 // Windows: jangan anggap jendela "tertutup" (throttle) & matikan pemeriksa ejaan bawaan Windows (penyebab macet saat klik kolom teks)
 app.commandLine.appendSwitch("disable-features", "CalculateNativeWinOcclusion,WinUseBrowserSpellChecker");
 const gotLock = app.requestSingleInstanceLock();
@@ -297,7 +316,7 @@ if (gotLock) app.whenReady().then(() => {
   if (!isDev) createTray();
   startBackend();
   startBackendWatch();
-  appLog(`POPSNAP mulai (v${app.getVersion()})`);
+  appLog(`WENEVA mulai (v${app.getVersion()})`);
   // Kasih backend waktu sebentar buat nyala sebelum window dibuka, supaya
   // konsumen gak lihat error "gagal konek backend" di detik-detik pertama.
   setTimeout(createWindow, isDev ? 0 : 1500);
@@ -384,7 +403,7 @@ ipcMain.handle("files:write-chosen", async (_e, filePath, bytes) => {
 // ---------- IPC: DSLR Bridge ----------
 // Frontend manggil ini lewat window.electronAPI (lihat preload.js)
 
-const tempDir = path.join(os.tmpdir(), "popsnap-dslr");
+const tempDir = path.join(os.tmpdir(), "weneva-dslr");
 if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true });
 
 ipcMain.handle("dslr:check-connection", async () => {

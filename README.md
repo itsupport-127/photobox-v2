@@ -1,4 +1,4 @@
-# POPSNAP — Photobox App
+# WENEVA — Photobox App
 
 Fondasi aplikasi photobooth sesuai alur 7 tahap: Welcome → Pilih Template →
 Pembayaran (QRIS/Voucher) → Sesi Foto (8 shot, retake) → Editor (filter/stiker) →
@@ -15,7 +15,7 @@ Hasil + QR Download.
 ## Update: salin kode voucher, input kode dari keyboard, pemilih template ala dslrBooth
 
 - **Kode voucher**: klik kode (di tabel "Voucher Terbaru" maupun di kotak hasil buat voucher) = langsung tersalin, ada tanda "Tersalin ✓". Jika Clipboard API tidak ada (admin dibuka lewat http://192.168.x.x), dipakai cara cadangan. Tombol Salin API key kasir memakai mekanisme yang sama.
-- **Input kode voucher di booth**: mengetik dari keyboard PC langsung mengisi kolom TANPA mengklik apa pun (huruf/angka otomatis kapital, Backspace, Enter = kirim). Berlaku di semua mode keyboard dan bisa dicampur dengan tombol layar. Pengaturan Umum > Virtual Keyboard kini 3 pilihan: keyboard fisik / bawaan perangkat, keyboard layar POPSNAP, keyboard sentuh Windows (aplikasi desktop membuka TabTip.exe otomatis; perlu dites di PC booth).
+- **Input kode voucher di booth**: mengetik dari keyboard PC langsung mengisi kolom TANPA mengklik apa pun (huruf/angka otomatis kapital, Backspace, Enter = kirim). Berlaku di semua mode keyboard dan bisa dicampur dengan tombol layar. Pengaturan Umum > Virtual Keyboard kini 3 pilihan: keyboard fisik / bawaan perangkat, keyboard layar WENEVA, keyboard sentuh Windows (aplikasi desktop membuka TabTip.exe otomatis; perlu dites di PC booth).
 - **Template Editor > pemilih template** disamakan dengan dslrBooth: bintang favorit di kepala, panel berisi kolom Nama (ganti nama template), tombol urut A-Z / Z-A, dan daftar bergulir dengan thumbnail + bintang favorit per baris. Urutan dipilih diingat. Klik di luar atau Esc menutup panel.
 - **Fungsi favorit**: template berbintang = yang boleh dipilih tamu bila Tampilan > Template diatur "favorit". Template tanpa bintang tetap ada di editor tapi disembunyikan dari tamu.
 
@@ -47,12 +47,12 @@ Hasil + QR Download.
 
 ## Update: Export / Import format dslrBooth
 
-- **Export** sekarang menghasilkan ZIP berstruktur sama dengan dslrBooth: `preview.png`, gambar-gambar layer, `template.xml` (UTF-8 + BOM, CRLF, atribut & urutan yang sama), ditambah `popsnap.json` (seluruh layer POPSNAP).
-- **Import** menerima: ZIP dslrBooth, ZIP hasil Export POPSNAP, dan file `.popsnap.json` lama. Hasil impor dslrBooth ditampilkan dengan laporan: apa yang diperkirakan / dilewati.
+- **Export** sekarang menghasilkan ZIP berstruktur sama dengan dslrBooth: `preview.png`, gambar-gambar layer, `template.xml` (UTF-8 + BOM, CRLF, atribut & urutan yang sama), ditambah `popsnap.json` (seluruh layer WENEVA).
+- **Import** menerima: ZIP dslrBooth, ZIP hasil Export WENEVA, dan file `.popsnap.json` lama. Hasil impor dslrBooth ditampilkan dengan laporan: apa yang diperkirakan / dilewati.
 - Diverifikasi dengan file asli dslrBooth (`Untitled-25 Copy - 5.zip`): posisi, ukuran, KeepAspect, favorit, kertas 4x6, dan render identik dengan `preview.png` dslrBooth (selisih rata-rata 0,37/255). Export ulang file itu menghasilkan `template.xml` dengan atribut & nilai yang sama (hanya `LastSavedDate` yang berbeda).
 - **Yang sudah terverifikasi** dari contoh file: atribut `<Template>` dan elemen `<Image>`. **Belum ada contoh** untuk Photo / Text / Shape / rotasi / QR Code / Session Data dslrBooth:
   - Impor: Photo, Text, Shape dibaca dengan PERKIRAAN nama atribut (ditandai di laporan impor). Elemen lain dilewati dan dilaporkan.
-  - Export: hanya layer gambar yang ditulis ke `template.xml` (supaya dslrBooth tidak salah baca). Slot foto, teks, bentuk, dan rotasi tersimpan lengkap di `popsnap.json` sehingga POPSNAP -> POPSNAP tidak kehilangan apa pun, tetapi TIDAK akan muncul kalau ZIP itu dibuka di dslrBooth.
+  - Export: hanya layer gambar yang ditulis ke `template.xml` (supaya dslrBooth tidak salah baca). Slot foto, teks, bentuk, dan rotasi tersimpan lengkap di `popsnap.json` sehingga WENEVA -> WENEVA tidak kehilangan apa pun, tetapi TIDAK akan muncul kalau ZIP itu dibuka di dslrBooth.
   - Transparansi warna (alpha) pada bayangan dan latar tidak didukung; hanya warna.
 - Tanpa library tambahan (ZIP dibaca/ditulis sendiri), jadi tidak perlu `npm install`. Pengaman: maks. 500 file, 80 MB per file, 250 MB total, CRC diperiksa, ZIP terenkripsi / ZIP64 ditolak, gambar BMP/GIF/WEBP dikonversi ke PNG.
 
@@ -184,7 +184,7 @@ Setelah install, **wajib aktifkan webserver bawaannya**:
 2. Centang **"Use web server"** dan **"Allow interaction via webserver"**
 3. Pastikan port `5513` (default)
 4. **Restart aplikasi digiCamControl**
-5. **Biarkan digiCamControl tetap jalan di background** selama app POPSNAP dipakai
+5. **Biarkan digiCamControl tetap jalan di background** selama app WENEVA dipakai
    (jembatan kita bicara ke digiCamControl lewat `http://localhost:5513`, bukan
    lewat command-line, karena command-line digiCamControl tidak bisa dipakai
    bersamaan dengan aplikasinya yang sedang jalan)
@@ -326,9 +326,9 @@ Selain link download QR (yang otomatis kehapus sesuai `fileRetentionDays`),
 sekarang SEMUA hasil foto juga tersimpan **permanen** di folder lokal:
 
 ```
-backend/output/2026-09-10/POPSNAP-ab12cd/final.png       <- hasil jadi (dengan template)
-backend/output/2026-09-10/POPSNAP-ab12cd/raw/shot-1.jpg  <- SEMUA foto mentah (8x jepretan)
-backend/output/2026-09-10/POPSNAP-ab12cd/raw/shot-2.jpg
+backend/output/2026-09-10/WENEVA-ab12cd/final.png       <- hasil jadi (dengan template)
+backend/output/2026-09-10/WENEVA-ab12cd/raw/shot-1.jpg  <- SEMUA foto mentah (8x jepretan)
+backend/output/2026-09-10/WENEVA-ab12cd/raw/shot-2.jpg
 ...dst
 ```
 
@@ -431,15 +431,15 @@ cd frontend && npm run dev
 
 Gak perlu buka terminal manual tiap mau testing. Tinggal:
 
-1. **Double-klik `start-popsnap.bat`** (ada di folder paling luar project)
+1. **Double-klik `start-weneva.bat`** (ada di folder paling luar project)
 2. Tunggu — pertama kali dijalankan bakal install dependencies dulu (agak lama,
    cuma sekali), setelah itu langsung cepat tiap dibuka lagi
 3. Backend & frontend otomatis nyala di 2 jendela terpisah, browser otomatis kebuka
-4. **Buat matiin semuanya**: double-klik `stop-popsnap.bat`
+4. **Buat matiin semuanya**: double-klik `stop-weneva.bat`
 
-> Jendela hitam (terminal) yang kebuka pas `start-popsnap.bat` dijalankan itu
+> Jendela hitam (terminal) yang kebuka pas `start-weneva.bat` dijalankan itu
 > JANGAN ditutup manual selama masih dipakai — itu proses backend & frontend-nya
-> beneran jalan di situ. Tutup lewat `stop-popsnap.bat` aja biar bersih.
+> beneran jalan di situ. Tutup lewat `stop-weneva.bat` aja biar bersih.
 
 ## Cara menjalankan (development, manual)
 
@@ -482,7 +482,7 @@ Browser akan minta izin akses kamera — izinkan untuk melihat live preview di s
 ## Struktur project
 
 ```
-popsnap-app/
+weneva-app/
 ├── frontend/                  # Web app (React + Vite + Tailwind)
 │   ├── src/
 │   │   ├── config/appConfig.js       # SEMUA angka yang bisa diubah (timer, retake, retensi)
@@ -545,7 +545,7 @@ Backend — `backend/config.js`:
 
 ### Rencana Fase 7: Fitur terinspirasi dari Jepreto
 
-Dibahas 2026-10-10. User mau fitur-fitur ini DIGABUNG ke POPSNAP biar makin
+Dibahas 2026-10-10. User mau fitur-fitur ini DIGABUNG ke WENEVA biar makin
 lengkap/maksimal, dikerjakan belakangan (belum sekarang):
 
 - **Antrian digital** — tamu ambil nomor antrian, ada layar tampilan nomor
@@ -561,7 +561,7 @@ lengkap/maksimal, dikerjakan belakangan (belum sekarang):
 - **Template Marketplace + Creator Program** (ala Jepreto) — **versi FULL**
   sesuai keputusan user, bukan versi sederhana: akun creator, upload
   template publik, approval, kuota premium per bulan, dan monetisasi/
-  royalti. Ini scope-nya besar & beda model bisnis dari sisa app (POPSNAP
+  royalti. Ini scope-nya besar & beda model bisnis dari sisa app (WENEVA
   selama ini software internal per-toko, bukan platform publik) — perlu
   desain sistem akun creator terpisah, alur approval, dan skema pembayaran
   ke creator sebelum mulai coding.
@@ -570,13 +570,13 @@ Referensi fitur Jepreto (dibaca 2026-10-10, lihat jepreto.com/pricing):
 paket software mereka Rp600rb/bulan per PC, isinya termasuk monitoring
 real-time, laporan/analitik transaksi, multi-device, manajemen template,
 QRIS+offline, antrian digital, galeri event, cetak tambahan — sebagian
-besar sudah ada di POPSNAP, 4 item di atas yang masih kurang.
+besar sudah ada di WENEVA, 4 item di atas yang masih kurang.
 
 ### Rencana Fase 7 (lanjutan): Fitur terinspirasi dari Photobooth.plus
 
 Dibahas 2026-10-10 (sumber: photobooth.plus/id — web photobooth gratis
-untuk konsumen, beda model bisnis dari POPSNAP/Jepreto yang B2B kiosk
-berbayar). Fitur yang MAU digabung ke POPSNAP:
+untuk konsumen, beda model bisnis dari WENEVA/Jepreto yang B2B kiosk
+berbayar). Fitur yang MAU digabung ke WENEVA:
 
 - **Filter jauh lebih banyak & dikelompokkan** — sekarang Editor cuma punya
   5 filter dasar (none/bw/sepia/vivid/soft) di `EditorScreen.jsx`. Target:
@@ -594,10 +594,10 @@ berbayar). Fitur yang MAU digabung ke POPSNAP:
 - **One-click share lewat email** — tambahan di `ResultScreen.jsx`, kirim
   hasil foto/link download langsung ke email tamu, selain QR yang sudah ada.
 
-**Diputuskan SKIP (gak relevan dengan model bisnis POPSNAP), kecuali user
+**Diputuskan SKIP (gak relevan dengan model bisnis WENEVA), kecuali user
 berubah pikiran:**
 - Akun cloud gratis utk guest nyimpen histori lintas device — cocoknya buat
-  produk B2C gratisan, POPSNAP kiosk bayar-per-sesi gak butuh ini.
+  produk B2C gratisan, WENEVA kiosk bayar-per-sesi gak butuh ini.
 - Rental marketplace (platform penyewaan photobooth antar event organizer)
   — bisnis yang sama sekali berbeda dari software kiosk per-toko.
 
@@ -624,7 +624,7 @@ integrasi hardware PC + versi Android terpisah.
 - **Versi Android/tablet native** — YMT punya app Android terpisah (bukan
   cuma buka browser di tablet), dengan harga lisensi sendiri. Ini BUKAN
   sekadar fitur tambahan, ini platform baru (app Android native beda dari
-  web app POPSNAP yang sekarang). **Perlu didiskusikan terpisah** sebagai
+  web app WENEVA yang sekarang). **Perlu didiskusikan terpisah** sebagai
   keputusan produk, bukan langsung masuk antrian fitur — baru dicatat di
   sini sebagai ide, belum ada keputusan mau dikerjakan atau tidak.
 
@@ -679,14 +679,14 @@ integrasi hardware PC + versi Android terpisah.
 ## Membuat aplikasi .exe (installer Windows)
 
 1. Di PC yang punya Node.js 22+ dan internet, klik dua kali **`build-exe.bat`** (folder utama).
-2. Tunggu beberapa menit. Installer jadi di `electron\dist\POPSNAP Setup x.x.x.exe` — salin ke PC booth lalu install.
+2. Tunggu beberapa menit. Installer jadi di `electron\dist\WENEVA Setup x.x.x.exe` — salin ke PC booth lalu install.
 3. PC booth TIDAK perlu Node.js (backend memakai Node bawaan aplikasi).
-4. Data (database, upload, kunci login) disimpan di `%AppData%\POPSNAP\`, arsip foto di `Dokumen\POPSNAP-Photos` (bisa diubah di Admin > Pengaturan > Umum).
-5. Kalau pakai Midtrans, taruh file `.env` (MIDTRANS_SERVER_KEY dll.) di `%AppData%\POPSNAP\.env`.
+4. Data (database, upload, kunci login) disimpan di `%AppData%\WENEVA\`, arsip foto di `Dokumen\WENEVA-Photos` (bisa diubah di Admin > Pengaturan > Umum).
+5. Kalau pakai Midtrans, taruh file `.env` (MIDTRANS_SERVER_KEY dll.) di `%AppData%\WENEVA\.env`.
 6. Kamera DSLR tetap lewat digiCamControl (lihat bagian kamera) — jalan juga di .exe.
 7. Pakai kamera webcam: izin kamera diminta saat pertama kali.
 
-**Keluar dari aplikasi .exe (mirip dslrBooth):** tombol close / Alt+F4 meminta PIN, lalu jendela disembunyikan ke ikon POPSNAP di dekat jam (system tray). Dari tray: klik = buka lagi; klik kanan > "Keluar (PIN)" = minta PIN lalu aplikasi benar-benar ditutup. Ikon gembok di layar booth: PIN -> Menu petugas (buka dashboard admin / tutup aplikasi). Tamu tidak bisa menyembunyikan atau menutup aplikasi tanpa PIN. BUAT PIN dulu di Admin > Umum > Security Pin (tanpa PIN, semua aksi di atas terbuka untuk siapa saja). Saat layar penuh, jendela selalu di paling atas. Catatan: Windows tidak mengizinkan aplikasi memblokir Ctrl+Alt+Del / tombol Windows; untuk kunci total gunakan "Assigned Access" (kiosk mode) atau akun pengguna terbatas. Log backend: `%AppData%\POPSNAP\backend.log`. Dashboard admin di aplikasi .exe otomatis logout dan kembali ke layar booth bila tidak disentuh 10 menit.
+**Keluar dari aplikasi .exe (mirip dslrBooth):** tombol close / Alt+F4 meminta PIN, lalu jendela disembunyikan ke ikon WENEVA di dekat jam (system tray). Dari tray: klik = buka lagi; klik kanan > "Keluar (PIN)" = minta PIN lalu aplikasi benar-benar ditutup. Ikon gembok di layar booth: PIN -> Menu petugas (buka dashboard admin / tutup aplikasi). Tamu tidak bisa menyembunyikan atau menutup aplikasi tanpa PIN. BUAT PIN dulu di Admin > Umum > Security Pin (tanpa PIN, semua aksi di atas terbuka untuk siapa saja). Saat layar penuh, jendela selalu di paling atas. Catatan: Windows tidak mengizinkan aplikasi memblokir Ctrl+Alt+Del / tombol Windows; untuk kunci total gunakan "Assigned Access" (kiosk mode) atau akun pengguna terbatas. Log backend: `%AppData%\WENEVA\backend.log`. Dashboard admin di aplikasi .exe otomatis logout dan kembali ke layar booth bila tidak disentuh 10 menit.
 
 ## Kamera lewat SDK pabrikan (Canon / Nikon) — alternatif digiCamControl
 Pengaturan › Kamera › sumber DSLR › **Penghubung kamera**: digiCamControl (bawaan), **Canon SDK**, **Nikon SDK** (pilih modelnya), atau **Sony SDK**.
@@ -695,7 +695,7 @@ File SDK ikut terpasang di installer, jadi tidak perlu menyalin apa pun ke PC bo
 - `backend\sdk\sony\` : seluruh isi folder `sony` dari zip (termasuk subfolder `CrAdapter`)
 - `backend\sdk\nikon\<MODEL>\` : isi folder model dari zip Nikon (mis. `backend\sdk\nikon\D850\nikon_sdk_bridge.exe`, dst.; `Z_SERIES` untuk seri Z)
 (Cukup salin folder `canon`, `nikon`, dan `sony` dari `camera_sdks` ke `backend\sdk`. Folder `driver_assistant` tidak dipakai.)
-Pemakaian pertama: file SDK otomatis disalin ke `%AppData%\POPSNAP\sdk` (folder instalasi tidak bisa ditulisi).
+Pemakaian pertama: file SDK otomatis disalin ke `%AppData%\WENEVA\sdk` (folder instalasi tidak bisa ditulisi).
 Tutup aplikasi kamera lain (digiCamControl, EOS Utility, NX Tether) — satu kamera hanya bisa dipakai satu aplikasi. Atur kualitas foto kamera ke JPEG.
 Catatan: program perantara SDK belum teruji dengan kamera asli; kalau gagal, pesan error + log tampil di Pengaturan › Kamera.
 

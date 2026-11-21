@@ -7,7 +7,7 @@ const crypto = require("crypto");
 const db = require("./db");
 
 const DEFAULTS = {
-  event: { name: "POPSNAP", subtitle: "" },
+  event: { name: "WENEVA", subtitle: "" },
 
   // ---- UMUM ----
   general: {
@@ -20,8 +20,8 @@ const DEFAULTS = {
       video: { enabled: false, price: 0 },
       showLabels: true,
     },
-    kbSeeded: false,   // migrasi sekali: pengaturan lama "off" (bawaan lama) dinyalakan ke keyboard layar POPSNAP
-    virtualKeyboard: "builtin", // off = keyboard fisik / bawaan perangkat | builtin = keyboard layar POPSNAP | windows = keyboard sentuh Windows (dibuka otomatis di aplikasi desktop)
+    kbSeeded: false,   // migrasi sekali: pengaturan lama "off" (bawaan lama) dinyalakan ke keyboard layar WENEVA
+    virtualKeyboard: "builtin", // off = keyboard fisik / bawaan perangkat | builtin = keyboard layar WENEVA | windows = keyboard sentuh Windows (dibuka otomatis di aplikasi desktop)
     security: { pinHash: "", pinSalt: "", pinSeeded: false, pinDefault: false }, // PIN keluar dari layar penuh; disimpan ter-hash
     // Izin sosmed: tamu ditanya setelah bayar (sebelum pengumuman). Jawaban menandai folder sesi (BOLEH / TIDAK) untuk content creator.
     consent: { enabled: false, title: "IZIN FOTO", text: "Hai kak! Fotonya boleh kami bagikan di sosmed atau dipajang di mading toko? Pilih yang kakak nyaman ya.", seconds: 20 },
@@ -40,7 +40,7 @@ const DEFAULTS = {
   email: {
     enabled: false,
     host: "", port: 587, secure: false, user: "", pass: "",
-    from: "",           // mis. "POPSNAP <foto@domainkamu.com>" — pakai domain sendiri (SPF/DKIM) supaya tidak masuk spam
+    from: "",           // mis. "WENEVA <foto@domainkamu.com>" — pakai domain sendiri (SPF/DKIM) supaya tidak masuk spam
     subject: "Foto kamu dari {event} sudah siap",
     intro: "Terima kasih sudah berfoto! Foto kamu bisa diunduh lewat tombol di bawah. Tautan aktif selama 48 jam, setelah itu foto dihapus otomatis.",
     askText: "Masukkan email untuk menerima foto kamu",   // teks di layar input email
@@ -97,7 +97,7 @@ const DEFAULTS = {
   display: {
     autoFullscreen: true,   // klik Start / tombol layar penuh = masuk layar penuh (seperti F11)
     startFullscreen: true,  // aplikasi desktop (.exe) dibuka dalam layar penuh
-    colors: { background: "#14161B", primary: "#FF5F45", buttonText: "#14161B", secondary: "#1F222B" }, // tema Elegan: arang / koral / tinta (teks tombol) / permukaan
+    colors: { background: "#17171A", primary: "#FF5F45", buttonText: "#17171A", secondary: "#FFFDF9" }, // tema Krem: tinta / koral / tinta (teks tombol) / kertas
     startScreen: {
       image: "", stretch: "cover", // cover | contain | fill | center
       templateChoice: "favorites", // favorites (hanya template favorit/live yang tampil; sisanya Draft) | single
@@ -114,10 +114,10 @@ const DEFAULTS = {
       cropLiveview: true, hideCancel: false, showThumbnails: true, thumbnailLocation: "bottom",
       sayCheeseImage: "",
     },
-    sharing: { mode: "qr", hideDone: false, iconsLocation: "right", showLabels: true, offline: "auto", offlineText: "Koneksi internet sedang terputus. Hasil foto akan kami kirim melalui WhatsApp.",
+    sharing: { mode: "qr", hideDone: false, iconsLocation: "right", showLabels: true, offline: "auto", offlineText: "Koneksi internet sedang terputus, jadi tautan unduh foto belum tersedia.",
       thanksOn: true, thanksLang: "id", // ucapan di layar akhir; thanksLang: "id" = Indonesia saja, "both" = Indonesia + Inggris
-      thanksTitle: "Terima kasih telah berfoto di Popsnap", thanksText: "Semoga harimu menyenangkan. Sampai jumpa kembali.",
-      thanksTitleEn: "Thank you for taking photos at Popsnap", thanksTextEn: "Have a great day. See you again soon.", offlineTextEn: "Internet connection is down. Your photos will be sent to you via WhatsApp." }, // offline: auto = tanpa QR bila internet mati | force = selalu tanpa QR | off = tetap tampilkan QR
+      thanksTitle: "Terima kasih telah berfoto di Weneva", thanksText: "Semoga harimu menyenangkan. Sampai jumpa kembali.",
+      thanksTitleEn: "Thank you for taking photos at Weneva", thanksTextEn: "Have a great day. See you again soon.", offlineTextEn: "Internet connection is down, so the download link is not available yet." }, // offline: auto = tanpa QR bila internet mati | force = selalu tanpa QR | off = tetap tampilkan QR
     // Tombol kunci (gembok) -> PIN. Muncul di SEMUA layar booth, bukan hanya layar Start.
     lock: {
       position: "top-right",   // top-left | top-right | bottom-left | bottom-right
@@ -186,7 +186,7 @@ const DEFAULTS = {
     },
     pos: { apiKey: "" },
     // Sinkron riwayat transaksi ke aplikasi kasir (lihat cloudSync.js). Token dibuat di kasir: menu Transaksi Photobox > Studio.
-    cloud: { enabled: false, url: "", token: "", studioCode: "", countVoucherRevenue: false, discountEnabled: false, galleryEnabled: false, galleryUrl: "" }, // galleryUrl = alamat POPSNAP Galeri (halaman QR + cloud), lihat gallerySync.js
+    cloud: { enabled: false, url: "", token: "", studioCode: "", countVoucherRevenue: false, discountEnabled: false, galleryEnabled: false, galleryUrl: "" }, // galleryUrl = alamat WENEVA Galeri (halaman QR + cloud), lihat gallerySync.js
   },
 };
 
@@ -214,7 +214,7 @@ function load() {
   if (stored.display?.startScreen?.unlockOpacity !== undefined && stored.display?.lock === undefined) {
     cache.display.lock.opacity = num(stored.display.startScreen.unlockOpacity, 5, 100, cache.display.lock.opacity);
   }
-  // Migrasi tema: kalau warna tersimpan masih persis palet bawaan LAMA (ungu/pink), ganti ke palet PopSnap baru.
+  // Migrasi tema: kalau warna tersimpan masih persis palet bawaan LAMA (ungu/pink), ganti ke palet Weneva baru.
   // Warna yang sudah dikustom admin (selain kombinasi bawaan lama) TIDAK disentuh.
   const lc = stored.display?.colors;
   const LEGACY = { background: "#12081F", primary: "#FF3E8E", buttonText: "#FFFFFF", secondary: "#7B2FFF" };
@@ -222,9 +222,30 @@ function load() {
     cache.display.colors = { ...DEFAULTS.display.colors };
     persist();
   }
-  // Migrasi tema Elegan: palet bawaan PopSnap sebelumnya (merah/biru) diganti palet baru. Warna kustom admin tidak disentuh.
-  const pc = cache.display?.colors, PREV = { background: "#181B23", primary: "#E02843", buttonText: "#FFFFFF", secondary: "#4082AE" };
-  if (pc && Object.keys(PREV).every((k) => String(pc[k] ?? "").toUpperCase() === PREV[k])) { cache.display.colors = { ...DEFAULTS.display.colors }; persist(); }
+  // Migrasi tema Krem: palet bawaan sebelumnya (Weneva merah/biru, atau Elegan gelap) diganti palet baru. Warna kustom admin tidak disentuh.
+  const pc = cache.display?.colors;
+  const PREVS = [{ background: "#181B23", primary: "#E02843", buttonText: "#FFFFFF", secondary: "#4082AE" }, { background: "#14161B", primary: "#FF5F45", buttonText: "#14161B", secondary: "#1F222B" }];
+  if (pc && PREVS.some((P) => Object.keys(P).every((k) => String(pc[k] ?? "").toUpperCase() === P[k].toUpperCase()))) { cache.display.colors = { ...DEFAULTS.display.colors }; persist(); }
+  // Ganti nama ke WENEVA: teks tersimpan yang masih memuat nama lama (nama event, ucapan terima kasih, dll.) ikut diganti.
+  // Nilai yang berupa alamat folder/URL/kunci TIDAK disentuh (folder lama tetap menunjuk ke tempat yang benar).
+  (function rebrand(o) {
+    if (!o || typeof o !== "object") return;
+    for (const k of Object.keys(o)) {
+      const v = o[k];
+      if (typeof v === "string") {
+        if (/dir|path|url|token|key|pin|pass|secret|host|user|folder/i.test(k) || /[\\/]/.test(v) || !/popsnap/i.test(v)) continue;
+        const n = v.replace(/popsnap/gi, (m) => (m === m.toUpperCase() ? "WENEVA" : m[0] === m[0].toUpperCase() ? "Weneva" : "weneva"));
+        if (n !== v) { o[k] = n; persist(); }
+      } else if (v && typeof v === "object") rebrand(v);
+    }
+  })(cache);
+  // Versi self-service: tidak ada petugas yang mengirim lewat WhatsApp. Teks offline bawaan lama diganti; teks kustom admin tidak disentuh.
+  (function fixOffline(o) {
+    if (!o || typeof o !== "object") return;
+    if (typeof o.offlineText === "string" && /WhatsApp/.test(o.offlineText) && /terputus/.test(o.offlineText)) { o.offlineText = "Koneksi internet sedang terputus, jadi tautan unduh foto belum tersedia."; persist(); }
+    if (typeof o.offlineTextEn === "string" && /WhatsApp/.test(o.offlineTextEn) && /down/.test(o.offlineTextEn)) { o.offlineTextEn = "Internet connection is down, so the download link is not available yet."; persist(); }
+    for (const k of Object.keys(o)) if (o[k] && typeof o[k] === "object" && !Array.isArray(o[k])) fixOffline(o[k]);
+  })(cache);
   // Migrasi: teks bawaan lama "Photobox Serba Bisa" dihapus dari layar Start
   if (cache.event?.subtitle === "Photobox Serba Bisa") { cache.event.subtitle = ""; persist(); }
   // Migrasi: opsi "semua template" dihapus (hanya template Live/favorit yang tampil di booth)

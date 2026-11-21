@@ -37,15 +37,15 @@ export default function ResultLoading({ photos, mirror, lang, steps, CW, CH, P }
         </div>
       </div>
 
-      <div style={{ flex: "none", textAlign: "center", color: "#fff", textShadow: "0 2px 6px rgba(0,0,0,.45)", padding: `0 ${U(40)}` }}>
-        <p style={{ margin: 0, fontSize: U(P(46, 54, 46)), fontWeight: 800, fontStyle: "italic" }}>{lang === "en" ? tEn.title : t.title}</p>
+      <div style={{ flex: "none", textAlign: "center", color: "#17171A", padding: `0 ${U(40)}` }}>
+        <p style={{ margin: 0, fontSize: U(P(46, 54, 46)), fontWeight: 800 }}>{lang === "en" ? tEn.title : t.title}</p>
         <p style={{ margin: 0, marginTop: U(8), fontSize: U(P(26, 30, 26)), fontWeight: 600, opacity: .92 }}>{lang === "en" ? tEn.sub : t.sub}</p>
-        {lang === "both" && <p style={{ margin: 0, marginTop: U(6), fontSize: U(P(22, 26, 22)), fontWeight: 500, fontStyle: "italic", opacity: .85 }}>{tEn.title}</p>}
+        {lang === "both" && <p style={{ margin: 0, marginTop: U(6), fontSize: U(P(22, 26, 22)), fontWeight: 500, opacity: .85 }}>{tEn.title}</p>}
       </div>
 
       <ul style={{ flex: "none", margin: 0, padding: 0, listStyle: "none", display: "flex", justifyContent: "center", flexWrap: "wrap", gap: `${U(14)} ${U(P(44, 30, 36))}` }}>
         {steps.map((s) => (
-          <li key={s.id} className={s.done ? "rl-step rl-step--done" : "rl-step"} style={{ display: "flex", alignItems: "center", gap: U(10), fontSize: U(P(28, 28, 26)), fontWeight: 700, color: "#fff", textShadow: "0 1px 3px rgba(0,0,0,.4)" }}>
+          <li key={s.id} className={s.done ? "rl-step rl-step--done" : "rl-step"} style={{ display: "flex", alignItems: "center", gap: U(10), fontSize: U(P(28, 28, 26)), fontWeight: 700, color: "#17171A" }}>
             <span className="rl-mark" style={{ width: U(36), height: U(36), fontSize: U(24) }}>{s.done ? "\u2713" : ""}</span>
             {lang === "en" ? tEn[s.id] : t[s.id]}
           </li>

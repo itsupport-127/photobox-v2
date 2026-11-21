@@ -1,5 +1,5 @@
 // ==========================================================
-// POPSNAP — Konfigurasi utama aplikasi
+// WENEVA — Konfigurasi utama aplikasi
 // Semua angka yang bisa berubah (timer, batas retake, dll)
 // dikumpulkan di sini supaya gampang diubah tanpa oprek logic.
 // ==========================================================

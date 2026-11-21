@@ -53,7 +53,7 @@ export default function EmailScreen({ dispatch }) {
         </div>
 
         <button type="button" className="strip-btn" onClick={() => done(null)}
-          style={{ left: U(CW / 2 - bw - gap / 2), top: U(btnTop), width: U(bw), height: U(78), fontSize: U(36), padding: 0, background: "#FFEAC5", color: "#3A2E00" }}>Lewati</button>
+          style={{ left: U(CW / 2 - bw - gap / 2), top: U(btnTop), width: U(bw), height: U(78), fontSize: U(36), padding: 0, background: "#FFFFFF", color: "#17171A" }}>Lewati</button>
         <button type="button" className="strip-btn" disabled={!valid} onClick={() => valid && done(email)}
           style={{ left: U(CW / 2 + gap / 2), top: U(btnTop), width: U(bw), height: U(78), fontSize: U(36), padding: 0, opacity: valid ? 1 : 0.45 }}>Lanjut</button>
 

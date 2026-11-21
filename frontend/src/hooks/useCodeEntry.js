@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 
 /**
  * Pengisian kode (voucher) dari keyboard fisik TANPA harus mengklik kolom isian.
- * Dipakai bersama keyboard layar POPSNAP / keyboard sentuh Windows — semuanya mengisi nilai yang sama.
+ * Dipakai bersama keyboard layar WENEVA / keyboard sentuh Windows — semuanya mengisi nilai yang sama.
  *
  *  - Huruf & angka  : ditambahkan ke kode (otomatis huruf besar), sampai maxLength
  *  - Backspace      : hapus satu karakter

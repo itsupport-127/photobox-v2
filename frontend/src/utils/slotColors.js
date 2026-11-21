@@ -1,6 +1,6 @@
 // ==========================================================
 // Warna placeholder slot "Photo From Booth" per nomor (Template Editor & pratinjau template).
-// 5 warna pertama diambil dari logo PopSnap: biru, merah, pink, kuning, hijau.
+// 5 warna pertama diambil dari logo Weneva: biru, merah, pink, kuning, hijau.
 // Nomor 6-12 warna pendamping yang selaras. Nomor 13+ mengulang palet dengan versi lebih gelap.
 // Hanya memengaruhi placeholder; foto asli pelanggan tidak berubah.
 // ==========================================================

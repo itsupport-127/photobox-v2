@@ -94,7 +94,7 @@ async function checkCameraConnected() {
 
 /**
  * Ambil satu foto dan simpan ke path tujuan. Return path file yang tersimpan.
- * @param {string} outputPath - path lengkap file tujuan (misal: C:\popsnap\temp\shot1.jpg)
+ * @param {string} outputPath - path lengkap file tujuan (misal: C:\weneva\temp\shot1.jpg)
  */
 async function capturePhoto(outputPath) {
   if (platform === "win32") {

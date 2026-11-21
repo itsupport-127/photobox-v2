@@ -1,15 +1,15 @@
 // ==========================================================
 // sdkBridge — penghubung kamera lewat program perantara SDK pabrikan (canon_sdk_bridge.exe / nikon_sdk_bridge.exe).
 //
-// Kenapa program terpisah: DLL Canon EDSDK itu 32-bit, sedangkan POPSNAP 64-bit — keduanya tidak bisa satu proses.
-// Program perantara dijalankan sebagai proses anak; POPSNAP bicara lewat baris teks di stdin/stdout:
+// Kenapa program terpisah: DLL Canon EDSDK itu 32-bit, sedangkan WENEVA 64-bit — keduanya tidak bisa satu proses.
+// Program perantara dijalankan sebagai proses anak; WENEVA bicara lewat baris teks di stdin/stdout:
 //   kirim: CONNECT | LIVEVIEW_START | LIVEVIEW_STOP | CAPTURE | DISCONNECT | QUIT
 //   terima: READY_* | CONNECTED | CAMERA=nama | INCOMING_DIR=folder | LIVEVIEW_STARTED|FILE=path
 //           CAPTURE_DOWNLOADED|FILE=path|BYTES=n | ERROR|pesan | DISCONNECTED
 // (protokol diambil dari teks di dalam program perantara; belum diuji dengan kamera asli -> semua baris dicatat ke log
 //  dan ditampilkan di Pengaturan > Kamera supaya mudah dicocokkan.)
 //
-// Lokasi file: backend/sdk/canon/ dan backend/sdk/nikon/<MODEL>/ (ikut terpasang di installer; disalin otomatis ke %AppData%\POPSNAP\sdk).
+// Lokasi file: backend/sdk/canon/ dan backend/sdk/nikon/<MODEL>/ (ikut terpasang di installer; disalin otomatis ke %AppData%\WENEVA\sdk).
 // ==========================================================
 const { spawn } = require("child_process");
 const fs = require("fs");
@@ -21,7 +21,7 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 const isJpeg = (b) => b && b.length > 500 && b[0] === 0xff && b[1] === 0xd8;
 
 // Cari program perantara. File SDK ikut terpasang bersama aplikasi (backend/sdk/...), tapi folder instalasi
-// (Program Files) tidak bisa ditulisi, jadi pada pemakaian pertama disalin ke folder data (%AppData%\POPSNAP\sdk).
+// (Program Files) tidak bisa ditulisi, jadi pada pemakaian pertama disalin ke folder data (%AppData%\WENEVA\sdk).
 function findDir(brand, model) {
   const exe = `${brand}_sdk_bridge.exe`;
   const sub = brand === "nikon" ? String(model || "").replace(/[^A-Za-z0-9_\-]/g, "") : "";
@@ -46,7 +46,7 @@ class SdkBridge {
     this.proc = null;
     this.reset();
     this.lines = [];
-    this.lvDir = path.join(os.tmpdir(), `popsnap-lv-${brand}`);
+    this.lvDir = path.join(os.tmpdir(), `weneva-lv-${brand}`);
   }
   reset() { this.ready = false; this.connected = false; this.camera = ""; this.incoming = ""; this.lvFile = ""; this.lvOn = false; this.error = ""; this.waiters = []; }
   log(l) { this.lines.push(l); if (this.lines.length > 60) this.lines.shift(); console.log(`[sdk:${this.brand}]`, l); }
@@ -163,7 +163,7 @@ class SdkBridge {
 
 const bridges = {};
 const native = require("./nativeBridge");
-// Pakai program perantara buatan POPSNAP (popsnap_<merek>_bridge.exe, live view lebih lancar) bila ada; kalau tidak, program bawaan lama.
+// Pakai program perantara buatan WENEVA (popsnap_<merek>_bridge.exe, live view lebih lancar) bila ada; kalau tidak, program bawaan lama.
 // Kamera Nikon seri Z belum punya bridge buatan sendiri (pembungkus MAID3 hanya untuk seri D) -> pakai program bawaan.
 const get = (brand, model) => {
   const z = brand === "nikon" && /^Z/i.test(String(model || ""));

@@ -3,8 +3,10 @@
 // frontend/src/config/appConfig.js supaya konsisten.
 // ==========================================================
 require("dotenv").config();
-// .env di folder data (aplikasi .exe: %AppData%\POPSNAP\.env) ikut dibaca, tidak menimpa nilai yang sudah ada
-require("dotenv").config({ path: require("path").join(process.env.POPSNAP_DATA || __dirname, ".env") });
+require("./envCompat"); // POPSNAP_* (nama lama) -> WENEVA_*
+// .env di folder data (aplikasi .exe: %AppData%\WENEVA\.env) ikut dibaca, tidak menimpa nilai yang sudah ada
+require("dotenv").config({ path: require("path").join(process.env.WENEVA_DATA || __dirname, ".env") });
+require("./envCompat");
 const os = require("os");
 
 // Deteksi otomatis alamat IP lokal PC ini di jaringan WiFi (bukan "localhost").
@@ -23,9 +25,9 @@ function detectLanIp() {
   return "localhost"; // fallback kalau gagal deteksi (misal gak ada WiFi/LAN aktif)
 }
 
-// Folder DATA (database, upload sementara, kunci login). Bawaan: folder backend. Aplikasi .exe mengisi POPSNAP_DATA ke folder
+// Folder DATA (database, upload sementara, kunci login). Bawaan: folder backend. Aplikasi .exe mengisi WENEVA_DATA ke folder
 // AppData milik pengguna, karena folder program (Program Files) tidak boleh ditulisi.
-const dataDir = process.env.POPSNAP_DATA || __dirname;
+const dataDir = process.env.WENEVA_DATA || __dirname;
 require("fs").mkdirSync(require("path").join(dataDir, "uploads"), { recursive: true });
 
 module.exports = {
@@ -39,9 +41,9 @@ module.exports = {
   // foto mentah hasil jepretan, dikelompokkan per tanggal, supaya bisa kamu buka
   // langsung lewat File Explorer kapan saja tanpa perlu app kebuka.
   // Default: folder "output" di dalam project. Ganti ke path manapun kamu mau,
-  // misal Desktop\POPSNAP-Photos, lewat OUTPUT_DIR di .env.
-  // Pustaka (Settings + Templates) yang bisa dibuka di File Explorer, lihat library.js. Aplikasi .exe mengisi POPSNAP_LIBRARY = Pictures\POPSNAP.
-  libraryDir: process.env.POPSNAP_LIBRARY || require("path").join(dataDir, "library"),
+  // misal Desktop\WENEVA-Photos, lewat OUTPUT_DIR di .env.
+  // Pustaka (Settings + Templates) yang bisa dibuka di File Explorer, lihat library.js. Aplikasi .exe mengisi WENEVA_LIBRARY = Pictures\WENEVA.
+  libraryDir: process.env.WENEVA_LIBRARY || require("path").join(dataDir, "library"),
   outputDir: process.env.OUTPUT_DIR || require("path").join(dataDir, "output"),
 
   // --- Sync ke server pusat (opsional) ---

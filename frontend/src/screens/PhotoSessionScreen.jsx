@@ -26,7 +26,7 @@ async function lumaOfImage(src) {
   c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
   return lumaOfCanvas(c);
 }
-import logo from "../assets/logo-popsnap.png";
+import logo from "../assets/logo-weneva.png";
 import { photoSlotPlan } from "../utils/templatePhotos";
 import ShotThumb, { THUMB_MODES, shapeStyle } from "../components/ShotThumb";
 import useClipRecorder from "../hooks/useClipRecorder";
@@ -364,24 +364,24 @@ export default function PhotoSessionScreen({ session, dispatch }) {
         {/* Baris bawah (desain): Take | logo | Retake */}
         <div className="pay-timer" style={{ left: U(V(228, 60, sqRv ? 40 : 60)), top: U(V(995, 1620, sqRv ? 1112 : 1100)), height: U(64), padding: `0 ${U(32)}`, fontSize: U(34), fontWeight: 700 }}>Take : {taken}/{totalShots}</div>
         {/* Logo di atas (tengah, di antara Batal dan timer); saat pratinjau akhir kembali ke bawah karena judul menempati atas */}
-        <img src={logo} alt="PopSnap" draggable={false} className="strip-logo"
+        <img src={logo} alt="Weneva" draggable={false} className="strip-logo"
           style={sqRv ? { display: "none" } : stacked ? { left: U(V(0, 450, 510)), top: U(14), width: U(180) } : reviewing ? { left: U(774), top: U(1000), width: U(180) } : { left: U(774), top: U(10), width: U(180) }} />
         <div className="pay-timer" style={{ right: U(V(226, 60, sqRv ? 40 : 60)), top: U(V(995, 1620, sqRv ? 1112 : 1100)), height: U(64), padding: `0 ${U(34)}`, fontSize: U(34), fontWeight: 700 }}>Retake : {session.retakesUsed}/{maxRetakes}</div>
 
 
         {/* Mirror / No Mirror: tamu memilih tampilan kamera & hasil fotonya (masih bisa diubah lagi di editor) */}
-        <div role="group" aria-label="Mirror" style={{ left: U(V(982, 422, sqRv ? 581 : 660)), top: U(V(999, 1716, sqRv ? 1116 : 1070)), width: U(236), height: U(56), borderRadius: U(28), background: "#DBDBDB", border: "1px solid #000", overflow: "hidden", zIndex: 3 }}>
-          <div style={{ position: "absolute", top: 0, height: "100%", borderRadius: U(28), background: "#E02843", transition: "left .2s ease, width .2s ease", left: mirror ? 0 : U(92), width: mirror ? U(104) : U(144) }} />
+        <div role="group" aria-label="Mirror" style={{ left: U(V(982, 422, sqRv ? 581 : 660)), top: U(V(999, 1716, sqRv ? 1116 : 1070)), width: U(236), height: U(56), borderRadius: U(28), background: "#DBDBDB", border: "1px solid rgba(23,23,26,.14)", overflow: "hidden", zIndex: 3 }}>
+          <div style={{ position: "absolute", top: 0, height: "100%", borderRadius: U(28), background: "#FF5F45", transition: "left .2s ease, width .2s ease", left: mirror ? 0 : U(92), width: mirror ? U(104) : U(144) }} />
           {[[true, "Mirror", 0, 104], [false, "No Mirror", 92, 144]].map(([val, label, x, w]) => (
             <button key={label} type="button" aria-pressed={mirror === val} onClick={() => dispatch({ type: "SET_MIRROR", payload: { mirror: val } })}
-              style={{ position: "absolute", left: U(x), width: U(w), top: 0, height: "100%", border: 0, background: "transparent", color: mirror === val ? "#fff" : "#333", fontSize: U(22), fontWeight: 700, fontStyle: "italic", zIndex: 1 }}>{label}</button>
+              style={{ position: "absolute", left: U(x), width: U(w), top: 0, height: "100%", border: 0, background: "transparent", color: mirror === val ? "#17171A" : "#6B645A", fontSize: U(22), fontWeight: 700, zIndex: 1 }}>{label}</button>
           ))}
         </div>
 
         {/* Tombol potret bulat: di bawah bingkai kamera dengan jarak, tidak menimpa */}
         {!reviewing && (
           <button onClick={tap} disabled={!canTap || seq.phase === "countdown"} aria-label="Potret" className={`sess-capture${canTap && waiting && BTN_HINT && (manual || seq.phase === "await") ? ` ${BTN_HINT}` : ""}`} style={{ left: U(V(809, 485, 520)), top: U(V(980, 1580, 1040)), width: U(110), height: U(110) }}>
-            <Camera aria-hidden="true" strokeWidth={2.2} color="#E02843" style={{ width: U(54), height: U(54) }} />
+            <Camera aria-hidden="true" strokeWidth={2.2} color="#17171A" style={{ width: U(54), height: U(54) }} />
           </button>
         )}
       </div>

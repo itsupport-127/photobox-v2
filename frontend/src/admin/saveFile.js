@@ -27,7 +27,7 @@ function downloadFallback(blob, filename) {
  * @returns {Promise<null | { write(blob): Promise<{ where: string, askedLocation: boolean }>, discard(): Promise<void> }>}
  *          null = pengguna membatalkan dialog.
  */
-export async function chooseSaveTarget(filename, { description = "File", mime = "application/octet-stream", ext = ".zip", idKey = "popsnap-files" } = {}) {
+export async function chooseSaveTarget(filename, { description = "File", mime = "application/octet-stream", ext = ".zip", idKey = "weneva-files" } = {}) {
   const api = typeof window !== "undefined" ? window.electronAPI : undefined;
 
   if (api?.chooseSavePath) {
@@ -74,7 +74,7 @@ export async function chooseSaveTarget(filename, { description = "File", mime = 
  * Tampilkan dialog "Buka file". Mengembalikan File, null (dibatalkan), atau undefined bila browser tidak mendukung
  * (pemanggil lalu memakai <input type="file"> biasa — yang juga membuka dialog pilih file).
  */
-export async function chooseOpenFile({ description = "File", accept = {}, idKey = "popsnap-files" } = {}) {
+export async function chooseOpenFile({ description = "File", accept = {}, idKey = "weneva-files" } = {}) {
   if (typeof window === "undefined" || typeof window.showOpenFilePicker !== "function" || window.electronAPI?.isElectron) return undefined;
   try {
     const [handle] = await window.showOpenFilePicker({ id: idKey, multiple: false, types: [{ description, accept }] });

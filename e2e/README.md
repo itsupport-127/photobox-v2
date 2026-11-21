@@ -8,4 +8,4 @@ Menjalankan satu sesi booth penuh dengan kamera palsu Chromium sampai layar hasi
     SHAPE=landscape node smoke.cjs  # atau square
 
 Butuh backend (port 4000) dan frontend jalan, minimal satu template aktif, mode kamera webcam.
-Env: `POPSNAP_URL`, `POPSNAP_API`, `ADMIN_USER`, `ADMIN_PASS`, `SHAPE`. Gagal = exit code 1 dan tangkapan layar `smoke-gagal.png`.
+Env: `WENEVA_URL`, `WENEVA_API`, `ADMIN_USER`, `ADMIN_PASS`, `SHAPE`. Gagal = exit code 1 dan tangkapan layar `smoke-gagal.png`.

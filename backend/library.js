@@ -1,7 +1,7 @@
 // ==========================================================
-// Pustaka POPSNAP (seperti dslrBooth): folder yang bisa dibuka di File Explorer berisi
-//   <Pictures>\POPSNAP\Settings\popsnap-settings.json     seluruh konfigurasi (tanpa kunci pembayaran & PIN)
-//   <Pictures>\POPSNAP\Templates\<nama>__<id>\template.json + files\   tiap template beserta gambar yang dipakainya
+// Pustaka WENEVA (seperti dslrBooth): folder yang bisa dibuka di File Explorer berisi
+//   <Pictures>\WENEVA\Settings\popsnap-settings.json     seluruh konfigurasi (tanpa kunci pembayaran & PIN)
+//   <Pictures>\WENEVA\Templates\<nama>__<id>\template.json + files\   tiap template beserta gambar yang dipakainya
 // Isinya DICERMINKAN otomatis dari database tiap kali pengaturan / template berubah (jeda 3 detik), jadi folder ini
 // selalu terbaru. Database tetap sumber utama; folder dipakai untuk cadangan, salin ke PC lain, dan pemulihan:
 //   - PC / AppData baru (belum ada akun): pengaturan & template dipulihkan otomatis dari folder ini

@@ -47,7 +47,7 @@ export default function FolderPicker({ start = "", title = "Pilih folder", onPic
 
         <div className="flex items-center gap-2 px-4 py-2 border-b border-[#D5DCE4]">
           <button className="px-3 py-1.5 whitespace-nowrap border border-[#C7D0DA] rounded hover:bg-[#F4F7FA] disabled:opacity-40" disabled={busy || atRoot} onClick={() => go(data.parent)} title="Naik satu tingkat" aria-label="Naik satu tingkat">↑ Naik</button>
-          <input className={`${inputCls} font-mono`} value={typed} placeholder="Ketik alamat folder lalu Enter, contoh D:\POPSNAP-Foto" onChange={(e) => setTyped(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") go(typed.trim()); }} />
+          <input className={`${inputCls} font-mono`} value={typed} placeholder="Ketik alamat folder lalu Enter, contoh D:\WENEVA-Foto" onChange={(e) => setTyped(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") go(typed.trim()); }} />
           <Btn onClick={() => go(typed.trim())} disabled={busy}>Buka</Btn>
         </div>
 

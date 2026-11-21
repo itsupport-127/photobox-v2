@@ -1,5 +1,5 @@
 // ==========================================================
-// POPSNAP — Session State Machine
+// WENEVA — Session State Machine
 //
 // Ini "otak" alur aplikasi. Setiap tahap di flow kamu jadi satu
 // STATE. Pindah antar state hanya boleh lewat action yang

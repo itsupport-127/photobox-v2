@@ -121,7 +121,7 @@ export function LayerContent({ layer, canvasWidth, canvasHeight, photoUrl, filte
         </>
       );
     }
-    const sc = slotColor(layer.photoOrder); // warna per nomor foto (palet PopSnap)
+    const sc = slotColor(layer.photoOrder); // warna per nomor foto (palet Weneva)
     return (
       <>
         <div style={{
@@ -162,7 +162,7 @@ export function LayerContent({ layer, canvasWidth, canvasHeight, photoUrl, filte
         width: "100%", height: "100%", display: "flex", alignItems: "center", overflow: "visible", whiteSpace: "nowrap",
         justifyContent: layer.align === "left" ? "flex-start" : layer.align === "right" ? "flex-end" : "center",
         color: layer.color, fontFamily: layer.fontFamily, fontWeight: layer.bold ? "bold" : "normal",
-        fontStyle: layer.italic ? "italic" : "normal",
+        fontStyle: layer.italic ? "" : "normal",
         fontSize: `${((layer.fontSize || 48) / canvasWidth) * 100}cqw`, lineHeight: 1,
       }}>
         {layer.text}

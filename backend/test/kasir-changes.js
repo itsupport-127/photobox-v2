@@ -1,7 +1,7 @@
 // Uji: perubahan (edit/hapus) dari kasir diterapkan ke tx_log booth, galeri cloud ikut dihapus, tidak ada kirim ulang.
 //   node test/kasir-changes.js
 const os = require("os"), fs = require("fs"), path = require("path"), http = require("http"), assert = require("assert");
-process.env.POPSNAP_DATA = fs.mkdtempSync(path.join(os.tmpdir(), "booth-"));
+process.env.WENEVA_DATA = fs.mkdtempSync(path.join(os.tmpdir(), "booth-"));
 
 (async () => {
   // kasir & galeri tiruan

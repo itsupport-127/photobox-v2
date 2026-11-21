@@ -74,7 +74,7 @@ export default function PhotoAdjustModal({ slots, startSlot, adjust, filterId, m
   const { fx, fy } = overflowFrac(a.z, AR, pAR);
   const canPan = fx > 0.001 || fy > 0.001;
   const btn = "px-5 py-3 rounded-full font-bold text-[18px] border-2 border-black/80";
-  const round = { width: 56, height: 56, borderRadius: "50%", border: "2px solid #000", background: "#fff", display: "flex", alignItems: "center", justifyContent: "center" };
+  const round = { width: 56, height: 56, borderRadius: "50%", border: "1px solid rgba(23,23,26,.14)", background: "#fff", display: "flex", alignItems: "center", justifyContent: "center" };
 
   return (
     <div className="absolute inset-0 z-50 flex items-center justify-center p-3" style={{ background: "rgba(0,0,0,.78)" }} role="dialog" aria-label="Zoom dan geser foto">
@@ -84,13 +84,13 @@ export default function PhotoAdjustModal({ slots, startSlot, adjust, filterId, m
           <div className="flex gap-2 flex-wrap justify-center">
             {slots.map((s) => (
               <button key={s.n} type="button" onClick={() => setCur(s.n)} aria-pressed={s.n === cur}
-                style={{ width: 52, height: 52, borderRadius: "50%", border: "2px solid #000", fontWeight: 800, fontSize: 22, background: s.n === cur ? "#E02843" : "#fff", color: s.n === cur ? "#fff" : "#222" }}>{s.n + 1}</button>
+                style={{ width: 52, height: 52, borderRadius: "50%", border: "1px solid rgba(23,23,26,.14)", fontWeight: 800, fontSize: 22, background: s.n === cur ? "#FF5F45" : "#fff", color: s.n === cur ? "#fff" : "#222" }}>{s.n + 1}</button>
             ))}
           </div>
         )}
         {/* Jendela slot: persis bentuk slot di template */}
         <div ref={boxRef} onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up} onWheel={wheel}
-          style={{ position: "relative", overflow: "hidden", aspectRatio: String(AR), width: `min(86vw, calc(44vh * ${AR}))`, maxWidth: "100%", background: "#222", borderRadius: slot.radius || 0, border: "3px solid #E02843", touchAction: "none", cursor: canPan ? "grab" : "default", userSelect: "none" }}>
+          style={{ position: "relative", overflow: "hidden", aspectRatio: String(AR), width: `min(86vw, calc(44vh * ${AR}))`, maxWidth: "100%", background: "#222", borderRadius: slot.radius || 0, border: "3px solid #FF5F45", touchAction: "none", cursor: canPan ? "grab" : "default", userSelect: "none" }}>
           <div style={{ position: "absolute", inset: 0, transformOrigin: "center", transform: `translate(${a.tx * 100}%, ${a.ty * 100}%) scale(${a.z})` }}>
             <FilteredImg src={slot.url} filterId={filterId} mirror={mirror} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", pointerEvents: "none" }} />
           </div>
@@ -100,13 +100,13 @@ export default function PhotoAdjustModal({ slots, startSlot, adjust, filterId, m
         </p>
         <div className="flex items-center gap-3 w-full" style={{ maxWidth: 420 }}>
           <button type="button" aria-label="Perkecil" onClick={() => setZoom(live.current.z - 0.25, true)} style={round}><Minus size={26} /></button>
-          <input type="range" min={1} max={ADJ_MAX} step={0.01} value={a.z} aria-label="Zoom" onChange={(e) => setZoom(Number(e.target.value))} onPointerUp={() => commit(live.current)} onKeyUp={() => commit(live.current)} style={{ flex: 1, accentColor: "#E02843", height: 36 }} />
+          <input type="range" min={1} max={ADJ_MAX} step={0.01} value={a.z} aria-label="Zoom" onChange={(e) => setZoom(Number(e.target.value))} onPointerUp={() => commit(live.current)} onKeyUp={() => commit(live.current)} style={{ flex: 1, accentColor: "#FF5F45", height: 36 }} />
           <button type="button" aria-label="Perbesar" onClick={() => setZoom(live.current.z + 0.25, true)} style={round}><Plus size={26} /></button>
           <span style={{ width: 52, textAlign: "right", fontWeight: 700 }}>{Math.round(a.z * 100)}%</span>
         </div>
         <div className="flex gap-3">
           <button type="button" className={btn} style={{ background: "#fff" }} disabled={isNeutral(a)} onClick={() => { setA({ z: 1, tx: 0, ty: 0 }); onChange(cur, null); }}>Reset</button>
-          <button type="button" className={btn} style={{ background: "#E02843", color: "#fff" }} onClick={() => { commit(live.current); onClose(); }}>Selesai</button>
+          <button type="button" className={btn} style={{ background: "#FF5F45", color: "#17171A" }} onClick={() => { commit(live.current); onClose(); }}>Selesai</button>
         </div>
       </div>
     </div>

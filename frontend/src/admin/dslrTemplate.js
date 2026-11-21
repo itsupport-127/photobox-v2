@@ -15,7 +15,7 @@
 // Juga diverifikasi dari contoh asli: <Text Text FontName FontColor IsBold IsItalic Width Height Top Left Rotation> (tanpa FontSize:
 // ukuran huruf mengikuti tinggi kotak, diukur dari preview.png = ~0,88 x Height, rata tengah) dan bentuk <Rectangle> <Ellipse> <Line> <Star>
 // (BackgroundColor = isi, Color = garis, Thickness = tebal garis; Line = batang setebal Thickness di Top; Star = bentuk bintang).
-// Seluruh layer POPSNAP juga disimpan utuh di popsnap.json di dalam ZIP yang sama, sehingga POPSNAP -> POPSNAP tidak kehilangan apa pun.
+// Seluruh layer WENEVA juga disimpan utuh di popsnap.json di dalam ZIP yang sama, sehingga WENEVA -> WENEVA tidak kehilangan apa pun.
 // ==========================================================
 import { PAPERS, DPIS } from "./editorKit";
 
@@ -23,7 +23,7 @@ const esc = (s) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").
 const bool = (b) => (b ? "True" : "False");
 const argb = (hex, alpha = "FF") => `#${alpha}${String(hex || "#000000").replace("#", "").toUpperCase()}`;
 const int = (n) => String(Math.round(Number(n) || 0));
-// dslrBooth memakai nama font Windows; nama generik POPSNAP dipetakan ke font yang pasti ada
+// dslrBooth memakai nama font Windows; nama generik WENEVA dipetakan ke font yang pasti ada
 const dslrFont = (f) => ({ "sans-serif": "Arial", serif: "Times New Roman", monospace: "Courier New", cursive: "Comic Sans MS" }[f] || f || "Arial");
 const pad = (n) => String(n).padStart(2, "0");
 
@@ -137,7 +137,7 @@ function derivePaper(w, h, dpi) {
 const nearestDpi = (v) => DPIS.reduce((best, d) => (Math.abs(d - v) < Math.abs(best - v) ? d : best), DPIS[0]);
 
 /**
- * Terjemahkan template.xml dslrBooth + file gambarnya menjadi data template POPSNAP.
+ * Terjemahkan template.xml dslrBooth + file gambarnya menjadi data template WENEVA.
  * @returns {{ meta, favorite, layers, report }} report = [{ level: "info"|"warn", text }]
  */
 export async function importDslrTemplate(files) {
@@ -152,9 +152,9 @@ export async function importDslrTemplate(files) {
   const t = lowerAttrs(root);
   const W = Math.round(num(t.width, 1200)), H = Math.round(num(t.height, 1800));
   const dpi = nearestDpi(Math.round(num(t.resolution, 300)));
-  if (Math.round(num(t.resolution, 300)) !== dpi) report.push({ level: "warn", text: `Resolusi ${t.resolution} dpi tidak ada di daftar POPSNAP, dipakai ${dpi} dpi.` });
+  if (Math.round(num(t.resolution, 300)) !== dpi) report.push({ level: "warn", text: `Resolusi ${t.resolution} dpi tidak ada di daftar WENEVA, dipakai ${dpi} dpi.` });
   if (t.backgroundcolor && /^#?[0-9a-f]{8}$/i.test(t.backgroundcolor) && t.backgroundcolor.replace("#", "").slice(0, 2).toLowerCase() !== "ff") {
-    report.push({ level: "warn", text: "Latar template transparan di dslrBooth; di POPSNAP dipakai warna latar solid." });
+    report.push({ level: "warn", text: "Latar template transparan di dslrBooth; di WENEVA dipakai warna latar solid." });
   }
   if (isTrue(t.print_2_per_page)) report.push({ level: "warn", text: "Pengaturan 'print 2 per halaman' dari dslrBooth tidak didukung dan diabaikan." });
 

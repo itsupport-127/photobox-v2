@@ -56,7 +56,7 @@ html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background:
 const PAPER = { "2x6": [50800, 152400], "4x6": [101600, 152400], "5x7": [127000, 177800], "6x8": [152400, 203200], a5: [148000, 210000], "8x10": [203200, 254000], a4: [210000, 297000] };
 
 async function printHtml(html, { deviceName, copies = 1, landscape = false, files = {}, probe, paper }) {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "popsnap-print-"));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "weneva-print-"));
   const w = new BrowserWindow({ show: false, width: 1200, height: 1800, webPreferences: { sandbox: true, javascript: true, offscreen: false } });
   try {
     for (const [n, buf] of Object.entries(files)) fs.writeFileSync(path.join(dir, n), buf);
@@ -129,7 +129,7 @@ async function testPage(o) {
     <div style="position:absolute;left:0;right:0;top:50%;border-top:1px dashed #888"></div><div style="position:absolute;top:0;bottom:0;left:50%;border-left:1px dashed #888"></div>
     <div style="position:absolute;left:8mm;top:8mm;background:#fff">KIRI-ATAS</div><div style="position:absolute;right:8mm;top:8mm;background:#fff">KANAN-ATAS</div>
     <div style="position:absolute;left:8mm;bottom:8mm;background:#fff">KIRI-BAWAH</div><div style="position:absolute;right:8mm;bottom:8mm;background:#fff">KANAN-BAWAH</div>
-    <div style="position:absolute;left:20mm;right:6mm;top:44%;text-align:center;font-size:18px;font-weight:700">POPSNAP — TES CETAK</div>
+    <div style="position:absolute;left:20mm;right:6mm;top:44%;text-align:center;font-size:18px;font-weight:700">WENEVA — TES CETAK</div>
     <div style="position:absolute;left:20mm;right:6mm;top:52%;text-align:center;font-size:11px">${lab}</div>
     <div style="position:absolute;left:20mm;top:70%;width:70mm;border-top:0.3mm solid #000;height:3mm;border-left:0.3mm solid #000;border-right:0.3mm solid #000;box-sizing:border-box"></div>
     <div style="position:absolute;left:20mm;width:70mm;top:calc(70% + 3.5mm);text-align:center;font-size:9px">garis ukur 70 mm (mendatar)</div>

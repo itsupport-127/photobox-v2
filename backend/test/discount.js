@@ -1,7 +1,7 @@
 // Uji: diskon kasir di booth (cek harga, QRIS dengan harga setelah diskon, kode salah/kasir mati, pengiriman meta ke kasir).
 //   node test/discount.js
 const os = require("os"), fs = require("fs"), path = require("path"), http = require("http"), assert = require("assert"), { spawn } = require("child_process");
-const DATA = fs.mkdtempSync(path.join(os.tmpdir(), "booth-")); process.env.POPSNAP_DATA = DATA;
+const DATA = fs.mkdtempSync(path.join(os.tmpdir(), "booth-")); process.env.WENEVA_DATA = DATA;
 
 (async () => {
   let quotes = [], pushed = [], kasirDown = false;
@@ -35,7 +35,7 @@ const DATA = fs.mkdtempSync(path.join(os.tmpdir(), "booth-")); process.env.POPSN
     VALUES (?, 'qris', 'photo', 't35', 'Tes 35rb', 'PhotoBox', 28000, 'paid', ?, ?, ?, 35000, 7000, 'HEMAT5', 'Promo Pagi + Hemat 5rb', 0)`).run(REAL, nowIso, nowIso, nowIso);
   db.close?.();
   const PORT = 4700 + Math.floor(Math.random() * 200), B = `http://127.0.0.1:${PORT}`;
-  const srv = spawn(process.execPath, [path.join(__dirname, "..", "server.js")], { env: { ...process.env, PORT: String(PORT), POPSNAP_DATA: DATA }, stdio: ["ignore", "pipe", "pipe"] });
+  const srv = spawn(process.execPath, [path.join(__dirname, "..", "server.js")], { env: { ...process.env, PORT: String(PORT), WENEVA_DATA: DATA }, stdio: ["ignore", "pipe", "pipe"] });
   let log = ""; srv.stdout.on("data", (d) => (log += d)); srv.stderr.on("data", (d) => (log += d));
   const j = async (u, body) => { const r = await fetch(B + u, { method: body ? "POST" : "GET", headers: { "Content-Type": "application/json" }, body: body ? JSON.stringify(body) : undefined }); return { status: r.status, body: await r.json().catch(() => ({})) }; };
   for (let i = 0; i < 60; i++) { try { await fetch(B + "/api/health"); break; } catch { await new Promise((r) => setTimeout(r, 250)); } }

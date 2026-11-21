@@ -122,7 +122,7 @@ export default function SettingsPage() {
 
   function exportSettings() {
     const n = (storeName || "booth").replace(/[^A-Za-z0-9_-]+/g, "-").slice(0, 30) || "booth";
-    downloadJson(buildExport(s), `popsnap-pengaturan-${n}-${new Date().toISOString().slice(0, 10)}.json`);
+    downloadJson(buildExport(s), `weneva-pengaturan-${n}-${new Date().toISOString().slice(0, 10)}.json`);
   }
   async function importSettings(e) {
     const f = e.target.files?.[0]; e.target.value = "";

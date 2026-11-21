@@ -1,9 +1,9 @@
 @echo off
-title POPSNAP Launcher
+title WENEVA Launcher
 color 0D
 
 echo ===================================
-echo   POPSNAP - Menjalankan Aplikasi
+echo   WENEVA - Menjalankan Aplikasi
 echo ===================================
 echo.
 
@@ -30,14 +30,14 @@ if not exist "frontend\node_modules" (
 
 REM ---- Jalankan backend di jendela terpisah ----
 echo [3/4] Menjalankan backend...
-start "POPSNAP Backend" cmd /k "cd backend && npm start"
+start "WENEVA Backend" cmd /k "cd backend && npm start"
 
 REM Kasih waktu backend siap dulu sebelum frontend jalan
 timeout /t 3 /nobreak >nul
 
 REM ---- Jalankan frontend di jendela terpisah ----
 echo [4/4] Menjalankan frontend...
-start "POPSNAP Frontend" cmd /k "cd frontend && npm run dev"
+start "WENEVA Frontend" cmd /k "cd frontend && npm run dev"
 
 REM Kasih waktu Vite siap sebelum buka browser
 timeout /t 5 /nobreak >nul
@@ -48,13 +48,13 @@ start http://localhost:5173
 
 echo.
 echo ===================================
-echo   POPSNAP sudah jalan!
+echo   WENEVA sudah jalan!
 echo.
 echo   - JANGAN tutup 2 jendela hitam yang
 echo     barusan kebuka (itu backend & frontend)
 echo   - Buat masuk admin: localhost:5173/admin
 echo   - Buat tutup semuanya, jalankan
-echo     stop-popsnap.bat
+echo     stop-weneva.bat
 echo ===================================
 echo.
 pause

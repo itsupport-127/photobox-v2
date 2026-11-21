@@ -14,17 +14,17 @@ const extOf = (p) => (path.extname(String(p || "")).slice(1) || "bin").toLowerCa
 function listFiles(db, session) {
   const out = [];
   const add = (label, p, name, group) => { if (p) out.push({ label, path: p, ext: extOf(p), name: `${name}.${extOf(p)}`, group }); };
-  add("Foto template", session.final_image_path, "popsnap-foto", "main");
-  add("Video Live (momen bergerak)", session.video_path, "popsnap-live", "main");
+  add("Foto template", session.final_image_path, "weneva-foto", "main");
+  add("Video Live (momen bergerak)", session.video_path, "weneva-live", "main");
   const liveRow = db.prepare("SELECT path FROM session_files WHERE session_id = ? AND kind = 'live' LIMIT 1").get(session.id);
-  if (liveRow && !session.video_path) add("Video Live (momen bergerak)", liveRow.path, "popsnap-live", "main");
-  add("GIF foto", session.gif_path, "popsnap-gif", "main");
+  if (liveRow && !session.video_path) add("Video Live (momen bergerak)", liveRow.path, "weneva-live", "main");
+  add("GIF foto", session.gif_path, "weneva-gif", "main");
   const plainRow = db.prepare("SELECT path FROM session_files WHERE session_id = ? AND kind = 'gifplain' LIMIT 1").get(session.id);
-  if (plainRow) add("GIF foto polos", plainRow.path, "popsnap-gif-polos", "main");
+  if (plainRow) add("GIF foto polos", plainRow.path, "weneva-gif-polos", "main");
   const raws = db.prepare("SELECT idx, path FROM session_files WHERE session_id = ? AND kind = 'raw' ORDER BY idx").all(session.id);
-  for (const r of raws) add(`Foto mentah ${r.idx}`, r.path, `popsnap-mentah-${r.idx}`, "raw");
+  for (const r of raws) add(`Foto mentah ${r.idx}`, r.path, `weneva-mentah-${r.idx}`, "raw");
   const clips = db.prepare("SELECT idx, path FROM session_files WHERE session_id = ? AND kind = 'clip' ORDER BY idx").all(session.id);
-  for (const c of clips) add(`Klip foto ${c.idx}`, c.path, `popsnap-klip-${c.idx}`, "clips");
+  for (const c of clips) add(`Klip foto ${c.idx}`, c.path, `weneva-klip-${c.idx}`, "clips");
   return out;
 }
 
@@ -150,7 +150,7 @@ function mount(app, { db, backendDir, getStoreName }) {
     }
     if (!entries.length) return res.status(404).type("html").send(notFoundPage(getStoreName()));
     const zip = buildZip(entries);
-    res.set({ "Content-Type": "application/zip", "Content-Length": zip.length, "Content-Disposition": 'attachment; filename="popsnap-sesi.zip"' }).send(zip);
+    res.set({ "Content-Type": "application/zip", "Content-Length": zip.length, "Content-Disposition": 'attachment; filename="weneva-sesi.zip"' }).send(zip);
   });
 }
 

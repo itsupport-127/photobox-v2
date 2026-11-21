@@ -3,7 +3,7 @@
 //
 // Kenapa lewat backend: browser (Chrome/Edge/Firefox) TIDAK bisa membuka DSLR — di Windows DSLR muncul di
 // "Portable Devices" (PTP), bukan webcam. digiCamControl yang bicara ke kamera lewat USB, lalu menyediakan
-// web server lokal (default http://localhost:5513). Backend POPSNAP meneruskan live view & jepretan ke layar booth,
+// web server lokal (default http://localhost:5513). Backend WENEVA meneruskan live view & jepretan ke layar booth,
 // jadi jalan sama persis di Chrome maupun aplikasi .exe.
 //
 //   GET  /api/camera/dslr/status        -> { online, cameras:[nama], raw, error? }

@@ -1,7 +1,7 @@
 {
-  "name": "popsnap-cloud-dashboard",
+  "name": "weneva-cloud-dashboard",
   "version": "1.0.0",
-  "description": "Server pusat POPSNAP - monitoring semua toko",
+  "description": "Server pusat WENEVA - monitoring semua toko",
   "main": "server.js",
   "engines": { "node": ">=22.5.0" },
   "scripts": { "start": "node server.js" },

@@ -4,7 +4,7 @@ import { authHeader } from "../../services/authService";
 import { Btn } from "../ui";
 import { Row } from "./controls";
 
-// Folder pustaka (Pictures\POPSNAP: Settings + Templates), lihat backend/library.js.
+// Folder pustaka (Pictures\WENEVA: Settings + Templates), lihat backend/library.js.
 const call = (path, method = "GET", body) => fetch(`${API_BASE}${path}`, { method, headers: { ...(body ? { "Content-Type": "application/json" } : {}), ...authHeader() }, body: body ? JSON.stringify(body) : undefined }).then(async (r) => { const j = await r.json().catch(() => ({})); if (!r.ok) throw new Error(j.error || `HTTP ${r.status}`); return j; });
 
 export default function LibraryRow() {

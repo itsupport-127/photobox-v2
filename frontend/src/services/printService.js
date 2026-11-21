@@ -8,7 +8,7 @@ export const printingCfg = () => appConfig.settings?.printing ?? null;
 
 export async function listPrinters() {
   const p = el();
-  if (!p) return { ok: false, error: "Daftar printer hanya tersedia di aplikasi desktop POPSNAP (.exe).", printers: [] };
+  if (!p) return { ok: false, error: "Daftar printer hanya tersedia di aplikasi desktop WENEVA (.exe).", printers: [] };
   return p.list();
 }
 export const addSharedPrinter = (unc) => (el() ? el().addShare(unc) : Promise.resolve({ ok: false, error: "Hanya di aplikasi desktop." }));
@@ -34,7 +34,7 @@ export function paperForTemplate(cfg, template, dup) {
 /** Tes cetak memakai template asli + garis panduan di tepi kertas (cek apakah tercetak penuh atau terpotong). Tidak dihitung ke kuota / statistik cetak. */
 export async function printTemplateTest(cfg, template, composedUrl, which = "main") {
   const p = el();
-  if (!p) return { ok: false, error: "Cetak tes hanya di aplikasi desktop POPSNAP (.exe)." };
+  if (!p) return { ok: false, error: "Cetak tes hanya di aplikasi desktop WENEVA (.exe)." };
   const dup = cfg.strip2x6 && (template?.canvasWidth ?? 0) > 0 && (template.canvasHeight / template.canvasWidth) >= 2.5;
   return p.image({ dataUrl: composedUrl, ...unitOf(cfg[which]), copies: 1, sharpening: cfg.sharpening, fit: cfg.fit, paper: paperForTemplate(cfg, template, dup), autorotate: cfg.autorotate, dup, guides: true });
 }
@@ -42,7 +42,7 @@ export async function printTemplateTest(cfg, template, composedUrl, which = "mai
 /** calibrate: lembar kalibrasi = tanpa skala / geser aplikasi (untuk mengukur apa yang dilakukan driver), pada kertas `paper`. */
 export async function printTestPage(cfg, which = "main", opts = {}) {
   const p = el();
-  if (!p) return { ok: false, error: "Cetak tes hanya di aplikasi desktop POPSNAP (.exe)." };
+  if (!p) return { ok: false, error: "Cetak tes hanya di aplikasi desktop WENEVA (.exe)." };
   const paper = opts.paper || (cfg.paper === "template" ? "auto" : cfg.paper || "auto");
   return p.test(opts.calibrate ? { ...unitOf(cfg[which]), scale: 100, scaleY: 0, x: 0, y: 0, paper, calibrate: true } : { ...unitOf(cfg[which]), paper });
 }

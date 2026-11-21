@@ -2,8 +2,8 @@
 // Import / Export / Print Test Copy untuk Template Editor.
 //
 // Ekspor menghasilkan ZIP dengan struktur SAMA seperti dslrBooth (template.xml + preview.png + gambar), plus
-// popsnap.json berisi seluruh layer POPSNAP (foto, teks, bentuk, rotasi...) supaya POPSNAP -> POPSNAP tidak ada yang hilang.
-// Impor menerima: ZIP dslrBooth, ZIP hasil ekspor POPSNAP, dan file .popsnap.json lama.
+// popsnap.json berisi seluruh layer WENEVA (foto, teks, bentuk, rotasi...) supaya WENEVA -> WENEVA tidak ada yang hilang.
+// Impor menerima: ZIP dslrBooth, ZIP hasil ekspor WENEVA, dan file .popsnap.json lama.
 // File impor TIDAK dipercaya: setiap field divalidasi / dibatasi sebelum dipakai.
 // ==========================================================
 import appConfig from "../config/appConfig";
@@ -108,13 +108,13 @@ const text = (v, max, d = "") => (typeof v === "string" ? v.slice(0, max) : d);
 export function parseImport(raw) {
   if (raw.length > MAX_FILE_CHARS) throw new Error("File terlalu besar (maks. ± 60 MB).");
   let data;
-  try { data = JSON.parse(raw); } catch { throw new Error("File bukan template POPSNAP yang valid (bukan JSON)."); }
-  if (data?.format !== FORMAT || !data.template || !Array.isArray(data.layers)) throw new Error("File ini bukan hasil Export dari Template Editor POPSNAP.");
+  try { data = JSON.parse(raw); } catch { throw new Error("File bukan template WENEVA yang valid (bukan JSON)."); }
+  if (data?.format !== FORMAT || !data.template || !Array.isArray(data.layers)) throw new Error("File ini bukan hasil Export dari Template Editor WENEVA.");
   return sanitizeImported(data);
 }
 
 /**
- * Titik masuk impor: ZIP (dslrBooth atau POPSNAP) atau JSON lama.
+ * Titik masuk impor: ZIP (dslrBooth atau WENEVA) atau JSON lama.
  * @returns {{ meta, layers, favorite, report }}
  */
 export async function parseImportFile(file) {
@@ -125,7 +125,7 @@ export async function parseImportFile(file) {
   const files = await readZip(buf);
   const nativeBytes = files.get("popsnap.json");
   if (nativeBytes) {
-    // ZIP hasil ekspor POPSNAP: pakai popsnap.json (lengkap); gambar diambil dari file di dalam ZIP
+    // ZIP hasil ekspor WENEVA: pakai popsnap.json (lengkap); gambar diambil dari file di dalam ZIP
     let data;
     try { data = JSON.parse(new TextDecoder().decode(nativeBytes)); } catch { throw new Error("popsnap.json di dalam ZIP rusak."); }
     if (data?.format !== FORMAT || !data.template || !Array.isArray(data.layers)) throw new Error("popsnap.json di dalam ZIP tidak valid.");

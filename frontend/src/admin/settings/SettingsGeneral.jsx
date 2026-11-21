@@ -75,7 +75,7 @@ export default function SettingsGeneral({ s, set, pin, setPin, outputDir, only }
       <Card title="KEYBOARD & PIN">
         <Row label="Virtual Keyboard" hint="Mengetik dari keyboard PC SELALU bisa langsung (tanpa mengklik kolom isian) di semua pilihan ini. Keyboard Windows: di aplikasi desktop, keyboard sentuh Windows dibuka otomatis saat kolom kode voucher tampil.">
           <Select value={g.virtualKeyboard} onChange={(v) => set(["general", "virtualKeyboard"], v)} className="max-w-md"
-            options={[["off", "Keyboard fisik / bawaan perangkat (kolom bisa diketuk)"], ["builtin", "Keyboard layar POPSNAP"], ["windows", "Keyboard sentuh Windows"]]} />
+            options={[["off", "Keyboard fisik / bawaan perangkat (kolom bisa diketuk)"], ["builtin", "Keyboard layar WENEVA"], ["windows", "Keyboard sentuh Windows"]]} />
         </Row>
         <Row label="Security Pin" hint={`PIN 4–8 angka yang diminta saat keluar dari layar penuh (ikon gembok atau tombol F11). ${g.security.pinSet ? (g.security.pinDefault ? "PIN masih BAWAAN (0808) — segera ganti dengan PIN milikmu." : "PIN sudah terpasang.") : "Belum ada PIN: layar penuh bisa dibuka siapa saja."}`}>
           <div className="flex items-center gap-2">
@@ -95,7 +95,7 @@ export default function SettingsGeneral({ s, set, pin, setPin, outputDir, only }
           <Row label="Koneksi aman (SSL)" hint="Port 465 = nyalakan. Port 587 = biarkan mati (STARTTLS otomatis)."><Check checked={s.email.secure} onChange={(v) => set(["email", "secure"], v)} label="Gunakan SSL langsung" /></Row>
           <Row label="Username"><input className={inputCls} maxLength={200} autoComplete="off" value={s.email.user} onChange={(e) => set(["email", "user"], e.target.value)} /></Row>
           <Row label="Password / API key" hint={s.email.passSet ? "Tersimpan. Kosongkan untuk tidak mengubah." : "Belum diisi."}><input className={inputCls} type="password" autoComplete="new-password" maxLength={200} value={s.email.pass} onChange={(e) => set(["email", "pass"], e.target.value)} /></Row>
-          <Row label="Dari (From)" hint='Contoh: POPSNAP <foto@domainkamu.com>'><input className={inputCls} maxLength={200} value={s.email.from} onChange={(e) => set(["email", "from"], e.target.value)} /></Row>
+          <Row label="Dari (From)" hint='Contoh: WENEVA <foto@domainkamu.com>'><input className={inputCls} maxLength={200} value={s.email.from} onChange={(e) => set(["email", "from"], e.target.value)} /></Row>
           <Row label="Subjek" hint="{event} diganti nama event."><input className={inputCls} maxLength={150} value={s.email.subject} onChange={(e) => set(["email", "subject"], e.target.value)} /></Row>
           <Row label="Isi pesan"><textarea rows={3} maxLength={600} className={inputCls} value={s.email.intro} onChange={(e) => set(["email", "intro"], e.target.value)} /></Row>
           <Row label="Teks di layar tamu"><input className={inputCls} maxLength={120} value={s.email.askText} onChange={(e) => set(["email", "askText"], e.target.value)} /></Row>
@@ -122,7 +122,7 @@ export default function SettingsGeneral({ s, set, pin, setPin, outputDir, only }
       <Card title="DIRECTORIES">
         <Row label="Data Directory" hint="Semua foto & media tersimpan di sini (arsip permanen). Berlaku untuk sesi berikutnya — file lama tidak dipindahkan otomatis.">
           <div className="flex gap-2">
-            <input className={inputCls} placeholder={outputDir || "Contoh: D:\\POPSNAP-Foto"} value={g.dataDir ?? ""} onChange={(e) => set(["general", "dataDir"], e.target.value)} />
+            <input className={inputCls} placeholder={outputDir || "Contoh: D:\\WENEVA-Foto"} value={g.dataDir ?? ""} onChange={(e) => set(["general", "dataDir"], e.target.value)} />
             <Btn onClick={() => browse("Pilih Data Directory", g.dataDir || outputDir || "", (d) => set(["general", "dataDir"], d))}>Browse</Btn>
             {g.dataDir && <Btn onClick={() => set(["general", "dataDir"], "")}>Bawaan</Btn>}
           </div>

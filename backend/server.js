@@ -1,5 +1,5 @@
 // ==========================================================
-// POPSNAP Backend — Fase 2
+// WENEVA Backend — Fase 2
 //
 // Jalan LOKAL di PC booth. Menangani:
 //  - Template CRUD (upload PNG, simpan posisi slot)
@@ -11,6 +11,7 @@
 // (paymentService.js, sessionService.js) tinggal ganti
 // VITE_SIMULATE_PAYMENT=false tanpa ubah UI.
 // ==========================================================
+require("./envCompat"); // POPSNAP_* (nama lama) -> WENEVA_*
 const express = require("express");
 const cors = require("cors");
 const multer = require("multer");
@@ -29,8 +30,8 @@ const settingsStore = require("./settings");
 const mailer = require("./mailer");
 const cloud = require("./cloudSync"); // sinkron riwayat transaksi ke aplikasi kasir
 const doku = require("./doku"); // QRIS DOKU (SNAP)
-const library = require("./library"); // cermin Settings + Templates ke folder Pictures\POPSNAP
-const gallery = require("./gallerySync"); // unggah hasil sesi ke POPSNAP Galeri (halaman QR + cloud)
+const library = require("./library"); // cermin Settings + Templates ke folder Pictures\WENEVA
+const gallery = require("./gallerySync"); // unggah hasil sesi ke WENEVA Galeri (halaman QR + cloud)
 const { customAlphabet } = require("nanoid");
 // Mode akhir sesi (Admin > Tampilan > Sharing): "preview" = hasil hanya ditampilkan di booth, tanpa QR / link / unggah ke galeri cloud.
 const sharingOn = () => (settingsStore.load().display?.sharing?.mode ?? "qr") !== "preview";
@@ -151,11 +152,11 @@ const app = express();
 // dipanggil layar booth di PC ini. Karena itu hanya dilayani untuk permintaan dari PC booth sendiri: perangkat lain di WiFi studio
 // tidak bisa memicu jepret, menebak voucher / PIN, atau mematikan live view. Tidak terpengaruh: tautan unduh tamu (/s, /uploads),
 // admin dari perangkat lain (sudah wajib login), integrasi kasir (API key), dan webhook pembayaran.
-// Butuh akses kiosk dari perangkat lain? Isi POPSNAP_ALLOW_LAN=1 di .env.
+// Butuh akses kiosk dari perangkat lain? Isi WENEVA_ALLOW_LAN=1 di .env.
 const LOOPBACK = new Set(["127.0.0.1", "::1", "::ffff:127.0.0.1"]);
 const KIOSK_ONLY = ["/api/camera/", "/api/voucher/validate", "/api/discount/", "/api/kiosk/", "/api/session/", "/api/payment/qris", "/api/print/record", "/api/share/email"];
 app.use((req, res, next) => {
-  if (process.env.POPSNAP_ALLOW_LAN === "1" || !KIOSK_ONLY.some((p) => req.path.startsWith(p))) return next();
+  if (process.env.WENEVA_ALLOW_LAN === "1" || !KIOSK_ONLY.some((p) => req.path.startsWith(p))) return next();
   if (LOOPBACK.has(req.socket.remoteAddress)) return next();
   res.status(403).json({ error: "Hanya bisa diakses dari PC booth ini." });
 });
@@ -183,8 +184,8 @@ function diskInfo() {
     const target = (() => { try { return outputDir(); } catch { return config.dataDir; } })();
     const probe = fs.existsSync(target) ? target : config.dataDir;
     const st = fs.statfsSync(probe);
-    const fake = Number(process.env.POPSNAP_FAKE_FREE_GB); // hanya untuk uji
-    const freeGB = Number.isFinite(fake) && process.env.POPSNAP_FAKE_FREE_GB ? fake : Math.round((Number(st.bavail) * Number(st.bsize)) / 1e8) / 10, totalGB = Math.round((Number(st.blocks) * Number(st.bsize)) / 1e8) / 10;
+    const fake = Number(process.env.WENEVA_FAKE_FREE_GB); // hanya untuk uji
+    const freeGB = Number.isFinite(fake) && process.env.WENEVA_FAKE_FREE_GB ? fake : Math.round((Number(st.bavail) * Number(st.bsize)) / 1e8) / 10, totalGB = Math.round((Number(st.blocks) * Number(st.bsize)) / 1e8) / 10;
     v = { freeGB, totalGB, level: freeGB < 1 ? "critical" : freeGB < 5 ? "low" : "ok", path: probe };
   } catch { /* statfs tidak tersedia: anggap aman, jangan menghalangi sesi */ }
   diskCache = { at: Date.now(), v };
@@ -470,7 +471,7 @@ function outputDir() {
 function checkWritableDir(dir) {
   try {
     fs.mkdirSync(dir, { recursive: true });
-    const probe = path.join(dir, `.popsnap-test-${nanoid(6)}`);
+    const probe = path.join(dir, `.weneva-test-${nanoid(6)}`);
     fs.writeFileSync(probe, "ok");
     fs.unlinkSync(probe);
     return null;
@@ -531,7 +532,7 @@ app.post("/api/system/pick-folder", requirePerm("settings.manage"), (req, res) =
   try { if (!start || !path.isAbsolute(start) || !fs.statSync(start).isDirectory()) start = require("os").homedir(); } catch { start = require("os").homedir(); }
   const title = "Pilih folder";
   let cmd, args;
-  const env = { ...process.env, POPSNAP_START: start, POPSNAP_TITLE: title };
+  const env = { ...process.env, WENEVA_START: start, WENEVA_TITLE: title };
   if (process.platform === "win32") {
     // Dialog "Open" Windows (sama seperti jendela pilih file), dipakai untuk memilih folder: masuk ke folder tujuan lalu klik Open.
     const ps = [
@@ -539,8 +540,8 @@ app.post("/api/system/pick-folder", requirePerm("settings.manage"), (req, res) =
       "Add-Type -AssemblyName System.Windows.Forms",
       "$f = New-Object System.Windows.Forms.Form; $f.TopMost = $true; $f.ShowInTaskbar = $false; $f.StartPosition = 'CenterScreen'; $f.Size = New-Object System.Drawing.Size(0,0); $f.Opacity = 0; $f.Show(); $f.Activate()",
       "$d = New-Object System.Windows.Forms.OpenFileDialog",
-      "$d.Title = $env:POPSNAP_TITLE + ' - masuk ke foldernya lalu klik Open'",
-      "$d.InitialDirectory = $env:POPSNAP_START",
+      "$d.Title = $env:WENEVA_TITLE + ' - masuk ke foldernya lalu klik Open'",
+      "$d.InitialDirectory = $env:WENEVA_START",
       "$d.ValidateNames = $false; $d.CheckFileExists = $false; $d.CheckPathExists = $true",
       "$d.FileName = 'Pilih folder ini'",
       "if ($d.ShowDialog($f) -eq [System.Windows.Forms.DialogResult]::OK) { [IO.Path]::GetDirectoryName($d.FileName) }",
@@ -571,7 +572,7 @@ app.post("/api/settings/test-export-dir", requirePerm("settings.manage"), (req, 
   if (!dir || !path.isAbsolute(dir)) return res.status(400).json({ ok: false, error: "Isi dengan alamat folder lengkap, misalnya D:\\HASIL atau /home/user/hasil." });
   try {
     fs.mkdirSync(dir, { recursive: true });
-    const probe = path.join(dir, `.popsnap-test-${nanoid(6)}`);
+    const probe = path.join(dir, `.weneva-test-${nanoid(6)}`);
     fs.writeFileSync(probe, "ok");
     fs.unlinkSync(probe);
     res.json({ ok: true });
@@ -1324,7 +1325,7 @@ app.put("/api/settings", requirePerm("settings.manage", "payment.gateway"), (req
   const before = JSON.parse(JSON.stringify(settingsStore.load()));
   const newDataDir = typeof body.general?.dataDir === "string" ? body.general.dataDir.trim() : null;
   if (newDataDir) {
-    if (!path.isAbsolute(newDataDir)) return res.status(400).json({ error: "Data Directory harus alamat folder lengkap, misalnya D:\\POPSNAP-Foto." });
+    if (!path.isAbsolute(newDataDir)) return res.status(400).json({ error: "Data Directory harus alamat folder lengkap, misalnya D:\\WENEVA-Foto." });
     const bad = checkWritableDir(newDataDir);
     if (bad) return res.status(400).json({ error: `Data Directory: ${bad}` });
   }
@@ -1883,7 +1884,7 @@ app.post("/api/session/clip", express.raw({ type: () => true, limit: "60mb" }), 
 
 // Halaman unduh /s/<token> (+ files.json, all.zip)
 require("./cameraBridge").mount(app, { settingsStore });
-require("./sharePage").mount(app, { db, backendDir: config.dataDir, getStoreName: () => settingsStore.load().event?.name || db.prepare("SELECT store_name FROM store_settings WHERE id = 1").get()?.store_name || "POPSNAP" });
+require("./sharePage").mount(app, { db, backendDir: config.dataDir, getStoreName: () => settingsStore.load().event?.name || db.prepare("SELECT store_name FROM store_settings WHERE id = 1").get()?.store_name || "WENEVA" });
 
 // ---------- PAYMENT (QRIS via Midtrans) ----------
 
@@ -2072,7 +2073,7 @@ app.post("/api/cloud/sync", requirePerm("payment.gateway"), async (req, res) => 
 });
 cloud.start();
 
-// ---------- POPSNAP Galeri: unggah hasil sesi ke cloud + halaman QR (Pengaturan > Pembayaran) ----------
+// ---------- WENEVA Galeri: unggah hasil sesi ke cloud + halaman QR (Pengaturan > Pembayaran) ----------
 app.get("/api/gallery/status", requirePerm("payment.gateway"), (req, res) => res.json(gallery.status()));
 app.post("/api/gallery/test", requirePerm("payment.gateway"), async (req, res) => res.json(await gallery.testConnection()));
 app.post("/api/gallery/sync", requirePerm("payment.gateway"), async (req, res) => { const r = await gallery.run({ force: true }); res.json({ ...r, status: gallery.status() }); });
@@ -2190,7 +2191,7 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(config.port, () => {
-  console.log(`POPSNAP backend jalan di http://localhost:${config.port}`);
+  console.log(`WENEVA backend jalan di http://localhost:${config.port}`);
   console.log(`Alamat LAN buat QR/gambar (dites bisa diakses HP lain di WiFi sama): http://${config.publicHost}:${config.port}`);
   console.log(`Arsip foto permanen tersimpan di: ${outputDir()}`);
   if (config.publicHost === "localhost") {

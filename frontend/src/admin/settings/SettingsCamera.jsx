@@ -22,7 +22,7 @@ export default function SettingsCamera({ s, set, only }) {
   const videoRef = useRef(null);
   const streamRef = useRef(null);
 
-  function exportCamera() { downloadJson(buildCameraExport(s), `popsnap-kamera-${new Date().toISOString().slice(0, 10)}.json`); setProfMsg({ ok: "Berkas profil kamera diunduh." }); }
+  function exportCamera() { downloadJson(buildCameraExport(s), `weneva-kamera-${new Date().toISOString().slice(0, 10)}.json`); setProfMsg({ ok: "Berkas profil kamera diunduh." }); }
   async function importCamera(e) {
     const f = e.target.files?.[0]; e.target.value = "";
     if (!f) return;
@@ -183,7 +183,7 @@ export default function SettingsCamera({ s, set, only }) {
       </Card>)}
 
       {vis("KAMERA DSLR / MIRRORLESS") && c.mode === "dslr" && (
-        <Card title="KAMERA DSLR / MIRRORLESS" hint="Kamera seperti Canon EOS & Nikon muncul di Windows sebagai 'Portable Devices', jadi tidak terbaca browser. POPSNAP memakai digiCamControl (gratis) sebagai penghubung.">
+        <Card title="KAMERA DSLR / MIRRORLESS" hint="Kamera seperti Canon EOS & Nikon muncul di Windows sebagai 'Portable Devices', jadi tidak terbaca browser. WENEVA memakai digiCamControl (gratis) sebagai penghubung.">
           <Row label="Penghubung kamera" hint="digiCamControl = aplikasi gratis terpisah. Canon / Nikon / Sony SDK = program perantara resmi pabrikan, sudah ikut terpasang di aplikasi. Pilih lalu Simpan.">
             <Select value={d.driver ?? "digicam"} onChange={(v) => set(["camera", "dslr", "driver"], v)} options={[["digicam", "digiCamControl"], ["canon", "Canon SDK (EDSDK)"], ["nikon", "Nikon SDK"], ["sony", "Sony SDK (Camera Remote)"]]} className="max-w-xs" />
             {d.driver === "nikon" && (
@@ -222,7 +222,7 @@ export default function SettingsCamera({ s, set, only }) {
             {shot?.error && <div className="mt-2"><Notice tone="warn">{shot.error}</Notice></div>}
             {shot?.image && <img src={shot.image} alt="hasil tes jepret" className="mt-2 max-w-[360px] max-h-[240px] border border-[#C7D0DA]" />}
           </Row>
-          <Row label="Uji live view" hint="Menampilkan live view kamera lewat POPSNAP. Jendela live view digiCamControl akan terbuka di layar PC — geser ke monitor lain / minimalkan.">
+          <Row label="Uji live view" hint="Menampilkan live view kamera lewat WENEVA. Jendela live view digiCamControl akan terbuka di layar PC — geser ke monitor lain / minimalkan.">
             {!lvTest ? <Btn onClick={() => setLvTest(true)}>Nyalakan live view</Btn> : (
               <div>
                 {lvSrc ? pvBox(dslrCam) : <div className="bg-black w-[360px] h-[240px] flex items-center justify-center text-white/70 text-[12px]">Menunggu live view…</div>}

@@ -32,7 +32,7 @@ export default function ResultScreen({ session, dispatch }) {
   const P = (l, p, q = l) => (portrait ? p : shape === "square" ? q : l);
   const s = appConfig.settings ?? {};
   const sharing = s.display?.sharing ?? { hideDone: false, iconsLocation: "right", showLabels: true };
-  const [offline, setOffline] = useState(false); // internet mati: tanpa QR, foto dikirim CS lewat WhatsApp
+  const [offline, setOffline] = useState(false); // internet mati: tanpa QR, tautan unduh belum tersedia
   const previewOnly = sharing.mode === "preview" || offline;
   const timeout = appConfig.timers.downloadQr || (previewOnly ? 30 : 0); // tanpa QR harus ada timer, kalau tidak layar tertahan selamanya
   // Mode "preview": akhir sesi hanya menampilkan hasil + tombol selesai + timer (tanpa QR). Timer habis = kembali ke layar awal. Mode "qr" (bawaan): QR + kode unduh.
@@ -300,7 +300,7 @@ export default function ResultScreen({ session, dispatch }) {
         )}
 
         {/* Kartu hasil */}
-        <div style={{ left: U(shape === "landscape" && !previewOnly ? X(cardF.x, cardF.w) : cardF.x), top: U(cardF.y), width: U(cardF.w), height: U(cardF.h), background: "#fff", border: "3px solid #000", borderRadius: U(P(51.5, 72.5)), boxSizing: "border-box" }} />
+        <div style={{ left: U(shape === "landscape" && !previewOnly ? X(cardF.x, cardF.w) : cardF.x), top: U(cardF.y), width: U(cardF.w), height: U(cardF.h), background: "#fff", border: "1px solid rgba(23,23,26,.14)", borderRadius: U(P(51.5, 72.5)), boxSizing: "border-box" }} />
         <div style={{ left: U(shape === "landscape" && !previewOnly ? X(boxF.x, boxF.w) : boxF.x), top: U(boxF.y), width: U(boxF.w), height: U(boxF.h), display: "flex", alignItems: "center", justifyContent: "center" }}>
           {preview}
         </div>
@@ -320,7 +320,7 @@ export default function ResultScreen({ session, dispatch }) {
               <button onClick={() => setAttempt((n) => n + 1)} className="strip-btn" style={{ width: U(260), height: U(64), fontSize: U(30) }}>Coba lagi</button>
             </div>
           ) : hideQr ? (
-            <p style={{ margin: 0, fontWeight: 800, fontStyle: "italic", fontSize: U(38), color: "#55606E", padding: `0 ${U(60)}` }}>Waktu download sudah berakhir</p>
+            <p style={{ margin: 0, fontWeight: 800, fontSize: U(38), color: "#55606E", padding: `0 ${U(60)}` }}>Waktu download sudah berakhir</p>
           ) : qrUrl ? (
             <>
               <RoundedQR value={qrUrl} size={428} level="Q" rounded={sharing.qrStyle !== "square"} style={{ width: U(P(428, 380)), height: U(P(428, 380)) }} />
@@ -328,7 +328,7 @@ export default function ResultScreen({ session, dispatch }) {
               {emailHint && <div style={{ fontSize: U(24), color: "#55606E", textAlign: "center" }}>Tautan juga dikirim ke {emailHint}</div>}
             </>
           ) : (
-            <p style={{ margin: 0, fontSize: U(32), fontStyle: "italic", color: "#55606E" }}>Menyiapkan file...</p>
+            <p style={{ margin: 0, fontSize: U(32), color: "#55606E" }}>Menyiapkan file...</p>
           )}
         </div>
 
@@ -340,17 +340,17 @@ export default function ResultScreen({ session, dispatch }) {
           const tabX = previewOnly ? rowX : (shape === "landscape" ? X(cardF.x, cardF.w) : cardF.x) + cardF.w / 2 - w / 2;
           return (
             <div style={{ left: U(tabX), top: U(cardF.y + cardF.h + 24), width: U(w), height: U(64), borderRadius: U(32), background: "#DBDBDB", overflow: "hidden" }}>
-              <div style={{ position: "absolute", top: 0, height: "100%", width: `${seg}%`, left: `${idx * seg}%`, borderRadius: U(32), background: "#E02843", transition: "left .2s ease" }} />
+              <div style={{ position: "absolute", top: 0, height: "100%", width: `${seg}%`, left: `${idx * seg}%`, borderRadius: U(32), background: "#FF5F45", transition: "left .2s ease" }} />
               {views.map(([id, label, pending], i) => (
                 <button key={id} type="button" disabled={!!pending} onClick={() => { picked.current = true; setView(id); }}
-                  style={{ opacity: pending ? 0.45 : 1, position: "absolute", top: 0, height: "100%", left: `${i * seg}%`, width: `${seg}%`, background: "transparent", border: 0, padding: 0, color: "#fff", fontStyle: "italic", fontWeight: 800, fontSize: U(30), display: "flex", alignItems: "center", justifyContent: "center", gap: U(8) }}>{React.createElement(ICONS[id], { "aria-hidden": true, strokeWidth: 2.2, style: { width: U(30), height: U(30) } })}{label}</button>
+                  style={{ opacity: pending ? 0.45 : 1, position: "absolute", top: 0, height: "100%", left: `${i * seg}%`, width: `${seg}%`, background: "transparent", border: 0, padding: 0, color: "#17171A", fontWeight: 800, fontSize: U(30), display: "flex", alignItems: "center", justifyContent: "center", gap: U(8) }}>{React.createElement(ICONS[id], { "aria-hidden": true, strokeWidth: 2.2, style: { width: U(30), height: U(30) } })}{label}</button>
               ))}
             </div>
           );
         })()}
 
         {animating && (
-          <p style={{ left: U(previewOnly ? CW / 2 - 300 : PANEL.x), top: U(previewOnly ? belowY : P(1004, 1750, 1030)), margin: 0, fontSize: U(P(24, 22)), fontStyle: "italic", color: previewOnly ? "#fff" : "#55606E", width: U(previewOnly ? 600 : PANEL.w), textAlign: "center" }}>{previewOnly ? "Membuat video Live & GIF…" : "Membuat video Live & GIF… QR sudah bisa dipindai, file menyusul di halaman unduh."}</p>
+          <p style={{ left: U(previewOnly ? CW / 2 - 300 : PANEL.x), top: U(previewOnly ? belowY : P(1004, 1750, 1030)), margin: 0, fontSize: U(P(24, 22)), color: previewOnly ? "#fff" : "#55606E", width: U(previewOnly ? 600 : PANEL.w), textAlign: "center" }}>{previewOnly ? "Membuat video Live & GIF…" : "Membuat video Live & GIF… QR sudah bisa dipindai, file menyusul di halaman unduh."}</p>
         )}
 
         {/* Tombol akhir (desain): Add Print (merah) + Finish (hijau) berdampingan di bawah QR */}
@@ -365,12 +365,12 @@ export default function ResultScreen({ session, dispatch }) {
           const x0 = cx - total / 2;
           return (<>
             {showAdd && <button type="button" className="strip-btn" onClick={() => { setCopiesN(1); setStep("copies"); }}
-              style={{ left: U(x0), top: U(y), width: U(aw), height: U(bh), fontSize: U(fs), background: "#E02843", color: "#fff" }}>Add Print</button>}
+              style={{ left: U(x0), top: U(y), width: U(aw), height: U(bh), fontSize: U(fs), background: "#FF5F45", color: "#17171A" }}>Add Print</button>}
             {showFin && <button type="button" className="strip-btn" onClick={() => dispatch({ type: "DONE" })}
-              style={{ left: U(x0 + (showAdd ? aw + gap : 0)), top: U(y), width: U(fw), height: U(bh), fontSize: U(fs), background: "#ABDBAB", color: "#565656" }}>Finish</button>}
-            {!printMsg && printWarn && <p style={{ left: U(cx - 300), top: U(y + bh + 14), width: U(600), margin: 0, textAlign: "center", fontSize: U(24), fontStyle: "italic", fontWeight: 700, color: "#ffd0d0", textShadow: "0 1px 3px rgba(0,0,0,.4)" }}>{printWarn}</p>}
+              style={{ left: U(x0 + (showAdd ? aw + gap : 0)), top: U(y), width: U(fw), height: U(bh), fontSize: U(fs), background: "#17171A", color: "#FFFFFF" }}>Finish</button>}
+            {!printMsg && printWarn && <p style={{ left: U(cx - 300), top: U(y + bh + 14), width: U(600), margin: 0, textAlign: "center", fontSize: U(24), fontWeight: 700, color: "#C2321B" }}>{printWarn}</p>}
             {staffWarn && <div role="status" style={{ position: "fixed", left: 10, bottom: 8, maxWidth: "60vw", fontSize: 13, color: "#ffe9a8", background: "rgba(0,0,0,.55)", padding: "4px 8px", borderRadius: 6, zIndex: 5, pointerEvents: "none" }}>⚠ Info staf: {staffWarn}</div>}
-            {printMsg && <p style={{ left: U(cx - 300), top: U(y + bh + 14), width: U(600), margin: 0, textAlign: "center", fontSize: U(24), fontStyle: "italic", fontWeight: 700, color: printMsg.err ? "#ffd0d0" : "#fff", textShadow: "0 1px 3px rgba(0,0,0,.4)" }}>{printMsg.t}</p>}
+            {printMsg && <p style={{ left: U(cx - 300), top: U(y + bh + 14), width: U(600), margin: 0, textAlign: "center", fontSize: U(24), fontWeight: 700, color: printMsg.err ? "#ffd0d0" : "#fff" }}>{printMsg.t}</p>}
           </>);
         })()}
         {sharing.thanksOn !== false && !(previewOnly && error) && !printMsg && !(animating && !previewOnly) && (() => {
@@ -382,16 +382,16 @@ export default function ResultScreen({ session, dispatch }) {
           const qrCx = PANEL.x + PANEL.w / 2, qrW = Math.min(820, 2 * (CW - qrCx) - 30, 2 * qrCx - 30), qrTop = P(885, 1676, 954) + P(69, 64) + 16;
           const slim = qrMode && shape !== "landscape";
           const OLD_OFF = "Koneksi internet sedang terputus. Foto Anda akan dikirim oleh tim kami lewat WhatsApp.";
-          const msg = offline ? (!sharing.offlineText || sharing.offlineText === OLD_OFF ? "Koneksi internet sedang terputus. Hasil foto akan kami kirim melalui WhatsApp." : sharing.offlineText) : (sharing.thanksText ?? "");
+          const msg = offline ? (!sharing.offlineText || sharing.offlineText === OLD_OFF ? "Koneksi internet sedang terputus, jadi tautan unduh foto belum tersedia." : sharing.offlineText) : (sharing.thanksText ?? "");
           const msgEn = offline ? sharing.offlineTextEn : sharing.thanksTextEn;
           const shadow = "0 1px 3px rgba(0,0,0,.4)";
           return (
-            <div style={{ ...(side ? { left: U(sideX), top: U(cardF.y + cardF.h / 2 - 90), width: U(CW - 40 - sideX) } : qrMode ? { left: U(qrCx - qrW / 2), top: U(qrTop), width: U(qrW) } : { left: U(CW / 2 - 440), top: U(Math.min(belowY + 8 + (animating && previewOnly ? 40 : 0), P(1117, 1800, 1200) - (both ? 175 : 105))), width: U(880) }), textAlign: "center", color: "#fff", textShadow: shadow, display: "flex", flexDirection: "column", gap: U(6) }}>
-              {sharing.thanksTitle && <p style={{ margin: 0, fontSize: U(slim ? 28 : P(34, 30)), fontWeight: 800, fontStyle: "italic", whiteSpace: slim ? "nowrap" : undefined }}>{sharing.thanksTitle}</p>}
+            <div style={{ ...(side ? { left: U(sideX), top: U(cardF.y + cardF.h / 2 - 90), width: U(CW - 40 - sideX) } : qrMode ? { left: U(qrCx - qrW / 2), top: U(qrTop), width: U(qrW) } : { left: U(CW / 2 - 440), top: U(Math.min(belowY + 8 + (animating && previewOnly ? 40 : 0), P(1117, 1800, 1200) - (both ? 175 : 105))), width: U(880) }), textAlign: "center", color: "#17171A", textShadow: shadow, display: "flex", flexDirection: "column", gap: U(6) }}>
+              {sharing.thanksTitle && <p style={{ margin: 0, fontSize: U(slim ? 28 : P(34, 30)), fontWeight: 800, whiteSpace: slim ? "nowrap" : undefined }}>{sharing.thanksTitle}</p>}
               {msg && !slim && !(qrMode && both) && <p style={{ margin: 0, fontSize: U(P(28, 25)), fontWeight: 600 }}>{msg}</p>}
               {both && !slim && (sharing.thanksTitleEn || (!qrMode && msgEn)) && (
                 <div style={{ marginTop: U(8), opacity: .88 }}>
-                  {sharing.thanksTitleEn && <p style={{ margin: 0, fontSize: U(P(24, 21)), fontWeight: 700, fontStyle: "italic" }}>{sharing.thanksTitleEn}</p>}
+                  {sharing.thanksTitleEn && <p style={{ margin: 0, fontSize: U(P(24, 21)), fontWeight: 700 }}>{sharing.thanksTitleEn}</p>}
                   {msgEn && !qrMode && <p style={{ margin: 0, fontSize: U(P(22, 19)), fontWeight: 500 }}>{msgEn}</p>}
                 </div>
               )}
@@ -399,7 +399,7 @@ export default function ResultScreen({ session, dispatch }) {
           );
         })()}
         {previewOnly && error && (
-          <div style={{ left: U(CW / 2 - 300), top: U(belowY), width: U(600), textAlign: "center", color: "#fff", fontWeight: 700, fontSize: U(26) }}>
+          <div style={{ left: U(CW / 2 - 300), top: U(belowY), width: U(600), textAlign: "center", color: "#17171A", fontWeight: 700, fontSize: U(26) }}>
             {error} <button onClick={() => setAttempt((n) => n + 1)} className="strip-btn" style={{ width: U(200), height: U(54), fontSize: U(26), marginLeft: U(12) }}>Coba lagi</button>
           </div>
         )}
@@ -410,7 +410,7 @@ export default function ResultScreen({ session, dispatch }) {
           const CH = P(1117, 1800, 1200), pw = P(882, 820), ph = 321;
           const x0 = CW / 2 - pw / 2, y0 = CH / 2 - 197.5;
           const pillW = pw - 303, pillX = x0 + (pw - pillW) / 2, maxN = Math.max(1, pcfg.copies || 1);
-          const circle = { position: "absolute", width: U(68), height: U(68), padding: 0, borderRadius: "50%", fontSize: U(60), lineHeight: 1, display: "flex", alignItems: "center", justifyContent: "center", background: "#E02843", color: "#fff" };
+          const circle = { position: "absolute", width: U(68), height: U(68), padding: 0, borderRadius: "50%", fontSize: U(60), lineHeight: 1, display: "flex", alignItems: "center", justifyContent: "center", background: "#FF5F45", color: "#17171A" };
           const total = (pcfg.price || 0) * copiesN;
           return (<>
             <div className="strip-panel" style={{ left: U(x0), top: U(y0), width: U(pw), height: U(ph), borderRadius: U(57) }} />
@@ -418,9 +418,9 @@ export default function ResultScreen({ session, dispatch }) {
             <div className="strip-tray" style={{ left: U(pillX), top: U(y0 + 138), width: U(pillW), height: U(120), borderRadius: U(60), display: "flex", alignItems: "center", justifyContent: "center", fontSize: U(110), fontWeight: 800, color: "#000" }}>{copiesN}</div>
             <button type="button" className="strip-btn" aria-label="Kurangi" disabled={copiesN <= 1} onClick={() => setCopiesN((n) => Math.max(1, n - 1))} style={{ ...circle, left: U(pillX - 35), top: U(y0 + 168), opacity: copiesN <= 1 ? 0.55 : 1 }}>−</button>
             <button type="button" className="strip-btn" aria-label="Tambah" disabled={copiesN >= maxN} onClick={() => setCopiesN((n) => Math.min(maxN, n + 1))} style={{ ...circle, left: U(pillX + pillW - 34), top: U(y0 + 168), opacity: copiesN >= maxN ? 0.55 : 1 }}>+</button>
-            {pcfg.price > 0 && <p style={{ left: U(x0), top: U(y0 + 268), width: U(pw), margin: 0, textAlign: "center", fontSize: U(30), fontStyle: "italic", fontWeight: 800, color: "#000" }}>Rp {Number(total).toLocaleString("id-ID")}</p>}
-            <button type="button" className="strip-btn" onClick={() => addPrint(copiesN)} style={{ left: U(CW / 2 - 90), top: U(y0 + 368), width: U(180), height: U(63), fontSize: U(36), background: "#E02843", color: "#fff" }}>NEXT</button>
-            <button type="button" onClick={() => setStep("main")} style={{ left: U(CW / 2 - 150), top: U(y0 + 368 + 63 + 22), width: U(300), height: U(50), background: "transparent", border: 0, color: "#fff", fontSize: U(28), fontStyle: "italic", fontWeight: 700, textDecoration: "underline" }}>Kembali</button>
+            {pcfg.price > 0 && <p style={{ left: U(x0), top: U(y0 + 268), width: U(pw), margin: 0, textAlign: "center", fontSize: U(30), fontWeight: 800, color: "#000" }}>Rp {Number(total).toLocaleString("id-ID")}</p>}
+            <button type="button" className="strip-btn" onClick={() => addPrint(copiesN)} style={{ left: U(CW / 2 - 90), top: U(y0 + 368), width: U(180), height: U(63), fontSize: U(36), background: "#FF5F45", color: "#17171A" }}>NEXT</button>
+            <button type="button" onClick={() => setStep("main")} style={{ left: U(CW / 2 - 150), top: U(y0 + 368 + 63 + 22), width: U(300), height: U(50), background: "transparent", border: 0, color: "#17171A", fontSize: U(28), fontWeight: 700, textDecoration: "underline" }}>Kembali</button>
           </>);
         })()}
 
@@ -439,12 +439,12 @@ export default function ResultScreen({ session, dispatch }) {
               ) : pay.qrString ? (
                 <div style={{ width: U(qrSize), height: U(qrSize) }}><QRCodeSVG value={pay.qrString} style={{ width: "100%", height: "100%" }} /></div>
               ) : (
-                <p style={{ margin: 0, fontSize: U(32), fontStyle: "italic", fontWeight: 700, color: "#55606E" }}>Menyiapkan QRIS…</p>
+                <p style={{ margin: 0, fontSize: U(32), fontWeight: 700, color: "#55606E" }}>Menyiapkan QRIS…</p>
               )}
             </div>
-            <button type="button" className="strip-btn" onClick={() => { cancelPay(); setStep("copies"); }} style={{ left: U(CW / 2 - 330), top: U(885 + dy), width: U(297), height: U(69), fontSize: U(40), background: "#E02843", color: "#fff" }}>Add Print</button>
-            <button type="button" className="strip-btn" onClick={() => { cancelPay(); dispatch({ type: "DONE" }); }} style={{ left: U(CW / 2 + 70), top: U(885 + dy), width: U(260), height: U(69), fontSize: U(40), background: "#ABDBAB", color: "#565656" }}>Finish</button>
-            <p style={{ left: U(CW / 2 - Math.min(CW - 80, 1100) / 2), top: U(972 + dy), width: U(Math.min(CW - 80, 1100)), margin: 0, textAlign: "center", fontSize: U(26), fontStyle: "italic", fontWeight: 700, color: "#fff", textShadow: "0 1px 3px rgba(0,0,0,.4)" }}>
+            <button type="button" className="strip-btn" onClick={() => { cancelPay(); setStep("copies"); }} style={{ left: U(CW / 2 - 330), top: U(885 + dy), width: U(297), height: U(69), fontSize: U(40), background: "#FF5F45", color: "#17171A" }}>Add Print</button>
+            <button type="button" className="strip-btn" onClick={() => { cancelPay(); dispatch({ type: "DONE" }); }} style={{ left: U(CW / 2 + 70), top: U(885 + dy), width: U(260), height: U(69), fontSize: U(40), background: "#17171A", color: "#FFFFFF" }}>Finish</button>
+            <p style={{ left: U(CW / 2 - Math.min(CW - 80, 1100) / 2), top: U(972 + dy), width: U(Math.min(CW - 80, 1100)), margin: 0, textAlign: "center", fontSize: U(26), fontWeight: 700, color: "#17171A" }}>
               {pay.copies} salinan · Rp {Number(pay.amount).toLocaleString("id-ID")}{pay.error ? "" : ` · otomatis tercetak setelah lunas (${pay.left} dtk)`}
             </p>
           </>);

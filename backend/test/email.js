@@ -1,7 +1,7 @@
 // Uji: email tautan foto (SMTP palsu lokal), booth tanpa penjaga diblokir saat QRIS belum siap, dan rahasia SMTP tidak bocor ke layar tamu.
 //   node test/email.js
 const os = require("os"), fs = require("fs"), path = require("path"), net = require("net"), assert = require("assert"), { spawn } = require("child_process");
-const DATA = fs.mkdtempSync(path.join(os.tmpdir(), "booth-")); process.env.POPSNAP_DATA = DATA;
+const DATA = fs.mkdtempSync(path.join(os.tmpdir(), "booth-")); process.env.WENEVA_DATA = DATA;
 
 (async () => {
   // SMTP palsu: menyimpan setiap pesan yang diterima
@@ -31,10 +31,10 @@ const DATA = fs.mkdtempSync(path.join(os.tmpdir(), "booth-")); process.env.POPSN
   }).listen(0);
 
   const settings = require("../settings"), db = require("../db");
-  settings.update({ email: { enabled: true, host: "127.0.0.1", port: smtp.address().port, secure: false, user: "", pass: "RAHASIA-SMTP-123", from: "POPSNAP <foto@contoh.id>", subject: "Foto dari {event}" } });
+  settings.update({ email: { enabled: true, host: "127.0.0.1", port: smtp.address().port, secure: false, user: "", pass: "RAHASIA-SMTP-123", from: "WENEVA <foto@contoh.id>", subject: "Foto dari {event}" } });
   db.close?.();
   const PORT = 4900 + Math.floor(Math.random() * 90), B = `http://127.0.0.1:${PORT}`;
-  const srv = spawn(process.execPath, [path.join(__dirname, "..", "server.js")], { env: { ...process.env, PORT: String(PORT), POPSNAP_DATA: DATA }, stdio: ["ignore", "pipe", "pipe"] });
+  const srv = spawn(process.execPath, [path.join(__dirname, "..", "server.js")], { env: { ...process.env, PORT: String(PORT), WENEVA_DATA: DATA }, stdio: ["ignore", "pipe", "pipe"] });
   let log = ""; srv.stdout.on("data", (d) => (log += d)); srv.stderr.on("data", (d) => (log += d));
   for (let i = 0; i < 60; i++) { try { await fetch(B + "/api/health"); break; } catch { await new Promise((r) => setTimeout(r, 250)); } }
   const done = (code) => { srv.kill(); smtp.close(); process.exit(code); };
@@ -56,7 +56,7 @@ const DATA = fs.mkdtempSync(path.join(os.tmpdir(), "booth-")); process.env.POPSN
     assert(mails.length === 1, "SMTP harus menerima 1 email. log=" + log.slice(-400));
     assert(mails[0].rcpt.includes("budi@contoh.id"), JSON.stringify(mails[0].rcpt));
     assert(mails[0].body.includes("https://galeri.contoh.id/s/K7M2QX4P9B"), "tautan galeri harus ada di email");
-    assert(/Subject: Foto dari POPSNAP/i.test(mails[0].body), "subjek harus memakai nama event");
+    assert(/Subject: Foto dari WENEVA/i.test(mails[0].body), "subjek harus memakai nama event");
 
     // 4) satu email per sesi: permintaan ulang tidak mengirim lagi
     assert((await post("/api/share/email", { sessionId: "S1", email: "budi@contoh.id", url: "https://galeri.contoh.id/s/K7M2QX4P9B" })).status === 200);

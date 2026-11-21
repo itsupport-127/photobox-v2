@@ -2,10 +2,10 @@
 // Gagal (exit 1) bila ada error halaman, langkah macet, atau layar hasil tidak muncul. Pakai kamera palsu Chromium (tanpa webcam).
 //   Syarat: backend dan frontend sudah jalan, ada minimal satu template aktif, kamera mode webcam.
 //   Jalankan: cd e2e && npm i playwright && node smoke.cjs      (ubah alamat lewat env di bawah)
-//   env: POPSNAP_URL (frontend, bawaan http://127.0.0.1:5173)  POPSNAP_API (bawaan http://127.0.0.1:4000)
+//   env: WENEVA_URL (frontend, bawaan http://127.0.0.1:5173)  WENEVA_API (bawaan http://127.0.0.1:4000)
 //        ADMIN_USER / ADMIN_PASS (bawaan admin / Admin12345)   SHAPE=landscape|portrait|square (bawaan portrait)
 const { chromium } = require("playwright");
-const URL_ = process.env.POPSNAP_URL || "http://127.0.0.1:5173", API = process.env.POPSNAP_API || "http://127.0.0.1:4000";
+const URL_ = process.env.WENEVA_URL || "http://127.0.0.1:5173", API = process.env.WENEVA_API || "http://127.0.0.1:4000";
 const SIZE = { landscape: [1728, 1117], portrait: [1080, 1920], square: [1200, 1200] }[process.env.SHAPE || "portrait"];
 
 const fail = (m) => { console.error("GAGAL:", m); process.exitCode = 1; };

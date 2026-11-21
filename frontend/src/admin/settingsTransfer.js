@@ -22,7 +22,7 @@ export function buildCameraExport(s) {
 
 /** Gabungkan hasil impor ke pengaturan saat ini (hanya kunci yang sudah ada; yang khusus-PC tetap milik PC ini). Mengembalikan { next, changed }. */
 export function applyImport(current, parsed) {
-  if (!parsed || parsed.format !== FORMAT || typeof parsed.settings !== "object") throw new Error("Berkas ini bukan ekspor pengaturan POPSNAP.");
+  if (!parsed || parsed.format !== FORMAT || typeof parsed.settings !== "object") throw new Error("Berkas ini bukan ekspor pengaturan WENEVA.");
   const next = clone(current);
   let changed = 0;
   const merge = (dst, src, parent = "") => {

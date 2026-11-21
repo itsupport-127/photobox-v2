@@ -11,7 +11,7 @@ import StepBadge from "../components/StepBadge";
 import StripNotice from "../components/StripNotice";
 import TemplateDecor from "../components/TemplateDecor";
 import { PAYMENT_ICONS } from "../components/paymentIcons";
-import logo from "../assets/logo-popsnap.png";
+import logo from "../assets/logo-weneva.png";
 
 /**
  * Tahap 4: Pembayaran (QRIS / voucher), batas waktu 45 detik.
@@ -259,7 +259,7 @@ export default function PaymentScreen({ session, dispatch }) {
   return (
     <div className="kiosk-screen h-full w-full flex items-center justify-center">
       <TemplateDecor />
-      <p className="relative z-10 text-white/90 font-bold italic text-lg">Memeriksa metode pembayaran...</p>
+      <p className="relative z-10 text-[#17171A]/80 font-bold  text-lg">Memeriksa metode pembayaran...</p>
     </div>
   );
 }
@@ -285,7 +285,7 @@ function PaymentSelect({ priceText, remaining, onBack, onQr, onVoucher, qrOfflin
       <TemplateDecor />
       <StepBadge step={4} time={`${remaining}s`} />
       <div className="strip-stage">
-        <img src={logo} alt="PopSnap" draggable={false} className="strip-logo" style={{ left: U(L.logo.left), top: U(L.logo.top), width: U(L.logo.width) }} />
+        <img src={logo} alt="Weneva" draggable={false} className="strip-logo" style={{ left: U(L.logo.left), top: U(L.logo.top), width: U(L.logo.width) }} />
 
         <h2 className="pay-title" style={{ left: U(L.title.left), top: U(L.title.top), width: U(L.title.width), height: U(96), fontSize: U(L.title.fs) }}>Select your payment</h2>
         {priceText && <p className="pay-price" style={{ left: U(L.price.left), top: U(L.price.top), width: U(L.price.width), fontSize: U(30) }}>{priceText}</p>}
@@ -315,7 +315,7 @@ function PayFrame({ title, titleBox, panel, tray, trayRadius, timerPos, remainin
     <div className="kiosk-screen strip-screen h-full w-full overflow-hidden" data-shape={shape}>
       <TemplateDecor glow={glow} />
       <div className="strip-stage">
-        <img src={logo} alt="PopSnap" draggable={false} className="strip-logo" style={{ left: U(logoPos.left), top: U(logoPos.top), width: U(logoPos.width) }} />
+        <img src={logo} alt="Weneva" draggable={false} className="strip-logo" style={{ left: U(logoPos.left), top: U(logoPos.top), width: U(logoPos.width) }} />
         <h2 className="pay-title" style={{ left: U(titleBox.left), top: U(titleBox.top), width: U(titleBox.w), height: U(titleBox.h), fontSize: U(titleBox.fs) }}>{title}</h2>
 
         <div className="strip-panel" style={{ left: U(panel.left), top: U(panel.top), width: U(panel.w), height: U(panel.h) }} />
@@ -359,7 +359,7 @@ function PaymentQr({ qrisData, qrisError, paid, remaining, onBack, onRetry, onUs
     >
       {paid ? (
         <>
-          <p className="absolute left-0 right-0 text-center font-extrabold italic text-black" style={{ top: U(52), fontSize: U(58), lineHeight: `${U(66)}` }}>Payment<br />successful</p>
+          <p className="absolute left-0 right-0 text-center font-extrabold  text-black" style={{ top: U(52), fontSize: U(58), lineHeight: `${U(66)}` }}>Payment<br />successful</p>
           <svg className="absolute" viewBox="0 0 280 280" fill="none" aria-hidden="true" style={{ left: U(166), top: U(222), width: U(280), height: U(280) }}>
             <circle cx="140" cy="140" r="124" fill="#36B27E" stroke="#000" strokeWidth="3" />
             <path d="M84 146 L124 186 L198 100" stroke="#fff" strokeWidth="26" strokeLinecap="round" strokeLinejoin="round" />
@@ -367,7 +367,7 @@ function PaymentQr({ qrisData, qrisError, paid, remaining, onBack, onRetry, onUs
         </>
       ) : qrisError ? (
         <div className="absolute inset-0 flex flex-col items-center justify-center text-center" style={{ padding: `0 ${U(60)}`, gap: U(22) }}>
-          <p className="font-bold text-[#E02843]" style={{ fontSize: U(32), lineHeight: 1.25 }}>QRIS cashless tidak dapat digunakan saat ini.<br />Silakan hubungi CS untuk bantuan pembayaran.</p>
+          <p className="font-bold text-[#FF5F45]" style={{ fontSize: U(32), lineHeight: 1.25 }}>QRIS cashless tidak dapat digunakan saat ini.<br />Silakan hubungi CS untuk bantuan pembayaran.</p>
           <p style={{ fontSize: U(20), color: "#8A94A3", margin: 0 }}>{qrisError}</p>
           <div className="flex" style={{ gap: U(16) }}>
             <button onClick={onRetry} className="strip-btn" style={{ width: U(180), height: U(60), fontSize: U(28), position: "static" }}>Coba lagi</button>
@@ -385,7 +385,7 @@ function PaymentQr({ qrisData, qrisError, paid, remaining, onBack, onRetry, onUs
           )}
         </div>
       ) : (
-        <p className="absolute inset-0 flex items-center justify-center italic font-bold text-[#55606E]" style={{ fontSize: U(34) }}>Menyiapkan QRIS...</p>
+        <p className="absolute inset-0 flex items-center justify-center  font-bold text-[#55606E]" style={{ fontSize: U(34) }}>Menyiapkan QRIS...</p>
       )}
     </PayFrame>
   );

@@ -1,5 +1,5 @@
 // ==========================================================
-// Sinkron riwayat transaksi ke aplikasi KASIR (Popsnap-Kasir).
+// Sinkron riwayat transaksi ke aplikasi KASIR (Weneva-Kasir).
 //
 // - Nomor transaksi dibuat DI SINI (PB-<KODE STUDIO>-<YYMMDD>-<URUT>) lalu dipakai apa adanya di kasir,
 //   jadi nomornya sama di kedua aplikasi. Untuk QRIS, nomor ini juga menjadi order_id Midtrans & id sesi.

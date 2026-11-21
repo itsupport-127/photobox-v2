@@ -45,8 +45,8 @@ export default function useCamera(orientation = "portrait", opts = {}) {
   // hasil jepret biasa: target kecerahan dipelajari dari foto-foto yang sudah diambil (disimpan di browser), lalu ~2x/detik
   // live view dibandingkan dengan target itu. Hanya menaikkan (tidak pernah menggelapkan) dan berubah halus.
   const readNum = (k, def, lo, hi) => { try { const v = Number(localStorage.getItem(k)); return v >= lo && v <= hi ? v : def; } catch { return def; } };
-  const [autoGain, setAutoGainState] = useState(() => readNum("popsnap.liveGain", 1, 1, 3.5));
-  const photoLumaRef = useRef(readNum("popsnap.photoLuma", 105, 60, 200)); // kecerahan rata-rata foto hasil jepret (0-255)
+  const [autoGain, setAutoGainState] = useState(() => readNum("weneva.liveGain", 1, 1, 3.5));
+  const photoLumaRef = useRef(readNum("weneva.photoLuma", 105, 60, 200)); // kecerahan rata-rata foto hasil jepret (0-255)
   const asIs = cam.liveView?.asIs === true; // "Apa adanya": tanpa gamma / auto-terang, seperti dslrBooth
   const autoOn = !asIs && (cam.liveView?.autoBright !== false) && previewDslr;
   const liveGain = asIs ? 1 : ((cam.liveView?.brightness ?? 100) / 100) * (autoOn ? autoGain : 1);
@@ -58,7 +58,7 @@ export default function useCamera(orientation = "portrait", opts = {}) {
     if (!(luma > 20)) return;
     const next = Math.min(200, Math.max(60, photoLumaRef.current * 0.5 + luma * 0.5));
     photoLumaRef.current = next;
-    try { localStorage.setItem("popsnap.photoLuma", String(Math.round(next * 10) / 10)); } catch { /* abaikan */ }
+    try { localStorage.setItem("weneva.photoLuma", String(Math.round(next * 10) / 10)); } catch { /* abaikan */ }
   };
 
   // ---------- Mode DSLR (digiCamControl lewat backend — jalan di Chrome maupun .exe) ----------
@@ -115,7 +115,7 @@ export default function useCamera(orientation = "portrait", opts = {}) {
       if (Math.abs(g - gainRef.current / ((cam.liveView?.brightness ?? 100) / 100)) > 0.04) {
         const v = Math.round(g * 100) / 100;
         setAutoGainState(v);
-        try { localStorage.setItem("popsnap.liveGain", String(v)); } catch { /* abaikan */ }
+        try { localStorage.setItem("weneva.liveGain", String(v)); } catch { /* abaikan */ }
       }
     }, 450);
     return () => clearInterval(id);

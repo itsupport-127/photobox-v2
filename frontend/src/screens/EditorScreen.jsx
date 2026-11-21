@@ -150,7 +150,7 @@ export default function EditorScreen({ session, dispatch }) {
 
       <div className="strip-stage">
         {/* Kartu putih */}
-        <div style={{ left: U(L.card.left), top: U(L.card.top), width: U(L.card.width), height: U(L.card.height), background: "#fff", border: "3px solid #000", borderRadius: U(L.card.r), boxSizing: "border-box" }} />
+        <div style={{ left: U(L.card.left), top: U(L.card.top), width: U(L.card.width), height: U(L.card.height), background: "#fff", border: "1px solid rgba(23,23,26,.14)", borderRadius: U(L.card.r), boxSizing: "border-box" }} />
         <div style={{ left: U(L.divider.left), top: U(L.divider.top), width: L.divider.width > 1 ? U(L.divider.width) : 1, height: L.divider.height > 1 ? U(L.divider.height) : 1, background: "#CECECE" }} />
         <div className="pay-timer" role="timer" style={{ left: U(L.timer.left), top: U(L.timer.top), width: U(161), height: U(40), fontSize: U(28) }}>{timerText}</div>
 
@@ -178,7 +178,7 @@ export default function EditorScreen({ session, dispatch }) {
                   const hitStyle = {
                     position: "absolute", left: `${layer.xPct}%`, top: `${layer.yPct}%`, width: `${layer.widthPct}%`, height: `${layer.heightPct}%`,
                     transform: layer.rotation ? `rotate(${layer.rotation}deg)` : undefined, touchAction: "none", cursor: shot != null ? "grab" : "default", boxSizing: "border-box",
-                    outline: isOver ? "4px solid #E02843" : selectedSlot === idx ? "3px solid #E02843" : drag ? "2px dashed rgba(255,255,255,.9)" : "none", outlineOffset: -3,
+                    outline: isOver ? "4px solid #FF5F45" : selectedSlot === idx ? "3px solid #FF5F45" : drag ? "2px dashed rgba(255,255,255,.9)" : "none", outlineOffset: -3,
                     background: isOver ? "rgba(224,40,67,.22)" : "transparent", zIndex: 5,
                   };
                   const onClick = () => { if (!suppressClick.current && shot != null) setSelectedSlot((s) => (s === idx ? null : idx)); };
@@ -220,11 +220,11 @@ export default function EditorScreen({ session, dispatch }) {
                   style={{
                     position: "relative", flex: "none", width: U(TILE.w), height: U(TILE.h), padding: 0, border: 0, borderRadius: U(8), overflow: "hidden", background: "#ddd",
                     touchAction: "none", opacity: drag?.shot === i ? 0.4 : dim ? 0.45 : 1,
-                    outline: selectedSlot === pos && used ? `${U(5)} solid #E02843` : used ? `${U(4)} solid #FDB533` : "none", outlineOffset: U(-4),
+                    outline: selectedSlot === pos && used ? `${U(5)} solid #FF5F45` : used ? `${U(4)} solid #FF5F45` : "none", outlineOffset: U(-4),
                   }}>
                   <img src={shot} alt="" draggable={false} style={{ width: "100%", height: "100%", objectFit: "cover", pointerEvents: "none", transform: mirror ? "scaleX(-1)" : undefined }} />
                   {used && (
-                    <span style={{ position: "absolute", top: U(8), left: U(8), width: U(40), height: U(40), borderRadius: "50%", background: "#FDB533", border: "1px solid #000", color: "#3A2E00", fontWeight: 800, fontSize: U(24), display: "flex", alignItems: "center", justifyContent: "center" }}>{pos + 1}</span>
+                    <span style={{ position: "absolute", top: U(8), left: U(8), width: U(40), height: U(40), borderRadius: "50%", background: "#FF5F45", border: "1px solid rgba(23,23,26,.14)", color: "#17171A", fontWeight: 800, fontSize: U(24), display: "flex", alignItems: "center", justifyContent: "center" }}>{pos + 1}</span>
                   )}
                 </button>
               );
@@ -241,7 +241,7 @@ export default function EditorScreen({ session, dispatch }) {
             <div style={{ left: 0, top: 0, width: "100%", height: "100%", pointerEvents: locked ? "none" : "auto", filter: locked ? `blur(${U(9)})` : "none", transition: "filter .25s ease" }} aria-hidden={locked}>
               {/* Mirror / No Mirror */}
               <div style={{ position: "absolute", left: U(L.mirror.left), top: U(L.mirror.top), width: U(464), height: U(80), borderRadius: U(40), background: "#DBDBDB", overflow: "hidden", transform: L.mirror.scale ? `scale(${L.mirror.scale})` : undefined, transformOrigin: "left top" }}>
-                <div style={{ position: "absolute", top: 0, height: "100%", borderRadius: U(40), background: "#E02843", transition: "left .2s ease, width .2s ease", left: mirror ? 0 : U(185), width: mirror ? U(196) : U(279) }} />
+                <div style={{ position: "absolute", top: 0, height: "100%", borderRadius: U(40), background: "#FF5F45", transition: "left .2s ease, width .2s ease", left: mirror ? 0 : U(185), width: mirror ? U(196) : U(279) }} />
                 <button type="button" tabIndex={locked ? -1 : 0} onClick={() => dispatch({ type: "SET_MIRROR", payload: { mirror: true } })} style={toggleText(0, 196)}>Mirror</button>
                 <button type="button" tabIndex={locked ? -1 : 0} onClick={() => dispatch({ type: "SET_MIRROR", payload: { mirror: false } })} style={toggleText(185, 279)}>No Mirror</button>
               </div>
@@ -285,12 +285,12 @@ export default function EditorScreen({ session, dispatch }) {
             disabled={selectedSlot === null} onClick={() => selectedSlot !== null && removeSlot(selectedSlot)}
             style={{ left: U(L.trash.left), top: U(L.trash.top), width: U(98), height: U(98), padding: 0, display: "flex", alignItems: "center", justifyContent: "center",
               opacity: selectedSlot === null && !drag ? 0.55 : 1, transform: drag?.overTrash ? "scale(1.25)" : undefined, background: drag?.overTrash ? "#B81C34" : undefined, transition: "transform .12s, opacity .15s" }}>
-            <Trash2 color="#fff" strokeWidth={2.6} style={{ width: U(44), height: U(44) }} />
+            <Trash2 color="#17171A" strokeWidth={2.6} style={{ width: U(44), height: U(44) }} />
           </button>
         ) : (
           <button type="button" className="strip-btn" aria-label="Kembali" onClick={() => setPhase("pick")}
             style={{ left: U(L.back.left), top: U(L.back.top), width: U(97), height: U(97), padding: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <ChevronLeft color="#fff" strokeWidth={3.4} style={{ width: U(52), height: U(52) }} />
+            <ChevronLeft color="#17171A" strokeWidth={3.4} style={{ width: U(52), height: U(52) }} />
           </button>
         )}
 
@@ -298,13 +298,13 @@ export default function EditorScreen({ session, dispatch }) {
         {filled > 0 && (
           <button type="button" className="strip-btn" onClick={() => setAdjSlot(selectedSlot ?? chosen.findIndex((v) => v != null))}
             style={{ left: U(L.adj.left), top: U(L.adj.top), width: U(L.adj.width), height: U(L.adj.height), fontSize: U(L.adj.font), padding: `0 ${U(10)}`, boxSizing: "border-box", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", gap: U(8), whiteSpace: "nowrap" }}>
-            <ZoomIn color="#fff" strokeWidth={2.6} style={{ width: U(L.adj.font + 4), height: U(L.adj.font + 4), flex: "none" }} /> {L.adj.label}
+            <ZoomIn color="#17171A" strokeWidth={2.6} style={{ width: U(L.adj.font + 4), height: U(L.adj.font + 4), flex: "none" }} /> {L.adj.label}
           </button>
         )}
 
         {/* Petunjuk singkat langkah 1 */}
         {phase === "pick" && (
-          <p style={{ left: U(L.hint.left), top: U(L.hint.top), width: U(L.hint.width), textAlign: "center", fontSize: U(24), fontStyle: "italic", fontWeight: 700, color: "#55606E", margin: 0 }}>
+          <p style={{ left: U(L.hint.left), top: U(L.hint.top), width: U(L.hint.width), textAlign: "center", fontSize: U(24), fontWeight: 700, color: "#55606E", margin: 0 }}>
             {filled}/{requiredSlots} foto terpilih{full ? " — seret untuk tukar, cubit dua jari untuk zoom" : " — ketuk atau seret foto ke bingkai"}
           </p>
         )}
@@ -325,7 +325,7 @@ export default function EditorScreen({ session, dispatch }) {
       {/* Foto yang sedang diseret */}
       {drag && (
         <img src={session.shots[drag.shot]} alt="" draggable={false}
-          style={{ position: "fixed", left: drag.x, top: drag.y, width: 110, height: 73, objectFit: "cover", transform: `translate(-50%, -50%)${mirror ? " scaleX(-1)" : ""}`, borderRadius: 8, border: "3px solid #E02843", boxShadow: "0 6px 18px rgba(0,0,0,.35)", pointerEvents: "none", zIndex: 60, opacity: 0.92 }} />
+          style={{ position: "fixed", left: drag.x, top: drag.y, width: 110, height: 73, objectFit: "cover", transform: `translate(-50%, -50%)${mirror ? " scaleX(-1)" : ""}`, borderRadius: 8, border: "3px solid #FF5F45", boxShadow: "0 6px 18px rgba(0,0,0,.35)", pointerEvents: "none", zIndex: 60, opacity: 0.92 }} />
       )}
     </div>
   );
@@ -334,6 +334,6 @@ export default function EditorScreen({ session, dispatch }) {
 function toggleText(left, width) {
   return {
     position: "absolute", top: 0, height: "100%", left: `calc(var(--u) * ${left})`, width: `calc(var(--u) * ${width})`, background: "transparent", border: 0, padding: 0,
-    color: "#fff", fontStyle: "italic", fontWeight: 800, fontSize: "calc(var(--u) * 42)", whiteSpace: "nowrap",
+    color: "#fff", fontWeight: 800, fontSize: "calc(var(--u) * 42)", whiteSpace: "nowrap",
   };
 }

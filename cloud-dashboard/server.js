@@ -1,5 +1,5 @@
 // ==========================================================
-// POPSNAP Cloud Dashboard — server PUSAT
+// WENEVA Cloud Dashboard — server PUSAT
 //
 // BEDA sama backend/server.js (yang jalan lokal di tiap PC toko).
 // Ini jalan di HOSTING (Railway/Render/VPS), nampung laporan ringkasan
@@ -132,5 +132,5 @@ app.get("/api/stores", requireOwner, (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`POPSNAP Cloud Dashboard jalan di port ${PORT}`);
+  console.log(`WENEVA Cloud Dashboard jalan di port ${PORT}`);
 });

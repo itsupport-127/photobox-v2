@@ -1,5 +1,5 @@
 // ==========================================================
-// nativeBridge — penghubung ke popsnap_canon_bridge.exe (program perantara buatan POPSNAP sendiri, 32-bit).
+// nativeBridge — penghubung ke popsnap_canon_bridge.exe (program perantara buatan WENEVA sendiri, 32-bit).
 // Frame live view & foto datang LANGSUNG lewat pipa (tanpa file di disk) sebagai paket biner:
 //   [1 byte jenis][4 byte panjang little-endian][isi]   jenis: T = teks, F = frame live view (JPEG), P = foto (JPEG)
 // Antarmukanya sama dengan SdkBridge (ensure/status/liveFrame/readFrameIfNew/capture/send/stop), jadi bisa saling menggantikan.
@@ -13,7 +13,7 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 const EXE_BY_BRAND = { canon: "popsnap_canon_bridge.exe", nikon: "popsnap_nikon_bridge.exe" };
 const EXE = EXE_BY_BRAND.canon; // (kompatibel dengan pemakai lama)
 
-// Sama seperti SdkBridge: salin bundel (backend/sdk/<brand>) ke %AppData%\POPSNAP\sdk bila perlu (folder instalasi tak bisa ditulisi).
+// Sama seperti SdkBridge: salin bundel (backend/sdk/<brand>) ke %AppData%\WENEVA\sdk bila perlu (folder instalasi tak bisa ditulisi).
 // Canon: exe + DLL satu folder (sdk/canon). Nikon: exe di sdk/nikon, file md3/DLL per model di sdk/nikon/<MODEL> (diberikan sebagai argumen).
 // Hasil: { dir: folder exe, arg: folder model (Nikon) }  atau null bila belum ada.
 function findDir(brand, model) {

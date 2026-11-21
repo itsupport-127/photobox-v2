@@ -259,7 +259,7 @@ function GalleryCard({ cloud, onSaved }) {
     reload(); setBusy(false);
   }
   return (
-    <Card title="GALERI CLOUD (QR KE WEBSITE)" hint="QR di layar hasil membuka halaman web POPSNAP: hasil template di atas, foto mentah & klip di bawah. File disimpan di cloud (bukan di PC booth), dikirim di latar belakang & dilanjutkan otomatis kalau internet putus.">
+    <Card title="GALERI CLOUD (QR KE WEBSITE)" hint="QR di layar hasil membuka halaman web WENEVA: hasil template di atas, foto mentah & klip di bawah. File disimpan di cloud (bukan di PC booth), dikirim di latar belakang & dilanjutkan otomatis kalau internet putus.">
       <Toggle checked={f.galleryEnabled} onChange={(v) => setF({ ...f, galleryEnabled: v })} label="Pakai galeri cloud untuk QR download" />
       <div className="grid grid-cols-2 gap-3 mt-3">
         <Field label="Alamat galeri"><input className={inputCls} placeholder="https://foto.domainanda.com" value={f.galleryUrl} onChange={(e) => setF({ ...f, galleryUrl: e.target.value })} /></Field>

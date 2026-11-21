@@ -15,7 +15,7 @@ export default function ToolsPage() {
   // Tutup aplikasi selalu lewat PIN (walau sudah login admin); tanpa PIN terpasang cukup konfirmasi
   function quitApp() {
     if (appConfig.settings?.general?.pinSet) kiosk.requestUnlock(() => window.electronAPI.kiosk.quit(), "PIN untuk menutup aplikasi");
-    else if (confirm("Tutup aplikasi POPSNAP sekarang?")) window.electronAPI.kiosk.quit();
+    else if (confirm("Tutup aplikasi WENEVA sekarang?")) window.electronAPI.kiosk.quit();
   }
 
   async function cleanup() {

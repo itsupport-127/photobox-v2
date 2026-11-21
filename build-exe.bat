@@ -1,8 +1,8 @@
 @echo off
-title POPSNAP - Buat aplikasi .exe
+title WENEVA - Buat aplikasi .exe
 color 0D
 echo ===================================
-echo   POPSNAP - Membuat installer .exe
+echo   WENEVA - Membuat installer .exe
 echo   (butuh internet + Node.js 22 atau lebih baru)
 echo ===================================
 echo.
@@ -17,7 +17,7 @@ echo [2/4] Build frontend...
 cd frontend
 call npm install
 if errorlevel 1 goto gagal
-set POPSNAP_EXE=1
+set WENEVA_EXE=1
 call npm run build
 if errorlevel 1 goto gagal
 cd ..
@@ -35,7 +35,7 @@ cd ..
 echo.
 echo ===================================
 echo   SELESAI. Installer ada di:
-echo   electron\dist\  (file "POPSNAP Setup x.x.x.exe")
+echo   electron\dist\  (file "WENEVA Setup x.x.x.exe")
 echo ===================================
 explorer electron\dist
 pause

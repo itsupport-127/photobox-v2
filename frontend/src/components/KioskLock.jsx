@@ -119,10 +119,10 @@ export default function KioskLock({ screenKey, inSession }) {
       {choice && (
         <div role="dialog" aria-label="Menu petugas" style={{ position: "fixed", inset: 0, zIndex: 95, background: "rgba(0,0,0,.72)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
           <div style={{ background: "#fff", borderRadius: 24, padding: 28, width: "100%", maxWidth: 420, textAlign: "center", boxShadow: "0 12px 40px rgba(0,0,0,.4)" }}>
-            <p style={{ margin: "0 0 18px", fontSize: 22, fontWeight: 800, fontStyle: "italic", color: "#181B23" }}>Menu petugas</p>
+            <p style={{ margin: "0 0 18px", fontSize: 22, fontWeight: 800, color: "#181B23" }}>Menu petugas</p>
             <div style={{ display: "grid", gap: 12 }}>
-              <button type="button" onClick={() => { setChoice(false); goAdmin(); }} style={{ padding: "14px 0", borderRadius: 999, border: "2px solid #000", background: "#FDB533", fontWeight: 800, fontSize: 18, color: "#3A2E00" }}>Buka dashboard admin</button>
-              <button type="button" onClick={() => window.electronAPI.kiosk.quit()} style={{ padding: "14px 0", borderRadius: 999, border: "2px solid #000", background: "#E02843", fontWeight: 800, fontSize: 18, color: "#fff" }}>Tutup aplikasi</button>
+              <button type="button" onClick={() => { setChoice(false); goAdmin(); }} style={{ padding: "14px 0", borderRadius: 999, border: "1px solid rgba(23,23,26,.14)", background: "#FF5F45", fontWeight: 800, fontSize: 18, color: "#17171A" }}>Buka dashboard admin</button>
+              <button type="button" onClick={() => window.electronAPI.kiosk.quit()} style={{ padding: "14px 0", borderRadius: 999, border: "1px solid rgba(23,23,26,.14)", background: "#FF5F45", fontWeight: 800, fontSize: 18, color: "#fff" }}>Tutup aplikasi</button>
               <button type="button" onClick={() => setChoice(false)} style={{ padding: "12px 0", borderRadius: 999, border: "2px solid #C7D0DA", background: "#fff", fontWeight: 700, fontSize: 16, color: "#55606E" }}>Batal</button>
             </div>
           </div>

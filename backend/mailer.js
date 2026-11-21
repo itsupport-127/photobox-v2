@@ -39,11 +39,11 @@ function transporter(cfg) {
 function ready(cfg = settingsStore.load().email) { return !!(cfg.enabled && cfg.host && cfg.from); }
 
 function buildMessage(cfg, eventName, url) {
-  const subject = String(cfg.subject || "").replace(/\{event\}/g, eventName || "POPSNAP");
-  const text = `${cfg.intro}\n\nUnduh foto kamu: ${url}\n\n${eventName || "POPSNAP"}`;
+  const subject = String(cfg.subject || "").replace(/\{event\}/g, eventName || "WENEVA");
+  const text = `${cfg.intro}\n\nUnduh foto kamu: ${url}\n\n${eventName || "WENEVA"}`;
   const html = `<!doctype html><html><body style="margin:0;padding:24px;background:#F4F7FA;font-family:Arial,Helvetica,sans-serif;color:#181B23">
 <div style="max-width:480px;margin:0 auto;background:#fff;border-radius:16px;padding:28px">
-<h2 style="margin:0 0 12px;font-size:20px">${esc(eventName || "POPSNAP")}</h2>
+<h2 style="margin:0 0 12px;font-size:20px">${esc(eventName || "WENEVA")}</h2>
 <p style="margin:0 0 20px;line-height:1.5;font-size:15px">${esc(cfg.intro)}</p>
 <p style="margin:0 0 20px"><a href="${esc(url)}" style="display:inline-block;background:#E02843;color:#fff;text-decoration:none;font-weight:bold;padding:14px 26px;border-radius:10px">Unduh Foto</a></p>
 <p style="margin:0;font-size:12px;color:#6B7684;word-break:break-all">Jika tombol tidak berfungsi, salin tautan ini:<br>${esc(url)}</p>
@@ -63,7 +63,7 @@ async function sendRaw(to, url) {
 async function sendTest(to) {
   const e = normalizeEmail(to);
   if (!e) throw new Error("Alamat email tidak valid.");
-  await sendRaw(e, "https://example.com/tes-popsnap");
+  await sendRaw(e, "https://example.com/tes-weneva");
 }
 
 let sentThisHour = [];

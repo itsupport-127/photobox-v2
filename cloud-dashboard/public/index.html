@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>POPSNAP — Dashboard Pusat</title>
+<title>WENEVA — Dashboard Pusat</title>
 <style>
   * { box-sizing: border-box; font-family: system-ui, sans-serif; }
   body { margin: 0; background: #12081F; color: white; min-height: 100vh; }
@@ -59,7 +59,7 @@ function renderLogin(needsSetup) {
     <div class="center">
       <form class="card" id="loginForm">
         <h1>${needsSetup ? "Setup Akun Owner" : "Login Dashboard Pusat"}</h1>
-        <p class="sub">${needsSetup ? "Cuma muncul sekali di awal" : "POPSNAP Multi-Store Monitoring"}</p>
+        <p class="sub">${needsSetup ? "Cuma muncul sekali di awal" : "WENEVA Multi-Store Monitoring"}</p>
         <input type="text" id="username" placeholder="Username" required />
         <input type="password" id="password" placeholder="Password ${needsSetup ? '(min 6 karakter)' : ''}" required minlength="${needsSetup ? 6 : 1}" />
         <button type="submit">${needsSetup ? "Buat Akun & Masuk" : "Masuk"}</button>
@@ -94,7 +94,7 @@ async function renderDashboard() {
     render(`
       <div class="dashboard">
         <div class="header">
-          <h1 style="margin:0;">Dashboard Pusat POPSNAP</h1>
+          <h1 style="margin:0;">Dashboard Pusat WENEVA</h1>
           <button class="logout" onclick="logout()">Keluar</button>
         </div>
         <div class="store-grid">

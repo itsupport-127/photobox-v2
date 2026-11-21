@@ -1,5 +1,5 @@
 // ==========================================================
-// Galeri cloud: unggah hasil sesi ke layanan POPSNAP Galeri (popsnap-gallery, di VPS) supaya QR membuka halaman web
+// Galeri cloud: unggah hasil sesi ke layanan WENEVA Galeri (weneva-gallery, di VPS) supaya QR membuka halaman web
 // (hasil template di atas, foto mentah & klip di bawah) yang bisa dibuka dari mana saja — bukan hanya satu WiFi dengan booth.
 //
 // - File TIDAK lewat VPS: booth minta URL unggah bertanda tangan ke galeri lalu mengunggah langsung ke bucket cloud (R2/S3).

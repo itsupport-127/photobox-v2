@@ -1,7 +1,7 @@
 // Uji: mode "Tanpa pembayaran" (booth hanya foto, bayar di kasir): tanpa layar bayar, tapi sesi tetap tercatat di kasir sebagai transaksi Gratis.
 //   node test/free-mode.js
 const os = require("os"), fs = require("fs"), path = require("path"), http = require("http"), assert = require("assert"), { spawn } = require("child_process");
-const DATA = fs.mkdtempSync(path.join(os.tmpdir(), "booth-")); process.env.POPSNAP_DATA = DATA;
+const DATA = fs.mkdtempSync(path.join(os.tmpdir(), "booth-")); process.env.WENEVA_DATA = DATA;
 
 (async () => {
   const pushed = [];
@@ -23,7 +23,7 @@ const DATA = fs.mkdtempSync(path.join(os.tmpdir(), "booth-")); process.env.POPSN
   db.prepare("INSERT INTO templates (id, name, category, background_url, canvas_width, canvas_height, price) VALUES ('t35', 'Strip 35rb', 'PhotoBox', '/x.png', 1200, 1800, 35000)").run();
   db.close?.();
   const PORT = 4900 + Math.floor(Math.random() * 90), B = `http://127.0.0.1:${PORT}`;
-  const srv = spawn(process.execPath, [path.join(__dirname, "..", "server.js")], { env: { ...process.env, PORT: String(PORT), POPSNAP_DATA: DATA }, stdio: ["ignore", "pipe", "pipe"] });
+  const srv = spawn(process.execPath, [path.join(__dirname, "..", "server.js")], { env: { ...process.env, PORT: String(PORT), WENEVA_DATA: DATA }, stdio: ["ignore", "pipe", "pipe"] });
   let log = ""; srv.stdout.on("data", (d) => (log += d)); srv.stderr.on("data", (d) => (log += d));
   for (let i = 0; i < 60; i++) { try { await fetch(B + "/api/health"); break; } catch { await new Promise((r) => setTimeout(r, 250)); } }
   const done = (code) => { srv.kill(); kasir.close(); process.exit(code); };

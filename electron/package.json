@@ -1,7 +1,7 @@
 {
-  "name": "popsnap-desktop",
+  "name": "weneva-desktop",
   "version": "1.0.0",
-  "description": "POPSNAP Photobox - Desktop App",
+  "description": "WENEVA Photobox - Desktop App",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
@@ -15,7 +15,7 @@
   },
   "build": {
     "appId": "com.popsnap.photobox",
-    "productName": "POPSNAP",
+    "productName": "WENEVA",
     "files": [
       "main.js",
       "preload.js",
@@ -71,12 +71,12 @@
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
-      "shortcutName": "POPSNAP"
+      "shortcutName": "WENEVA"
     },
     "directories": {
       "output": "dist",
       "buildResources": "build"
     }
   },
-  "author": "POPSNAP"
+  "author": "WENEVA"
 }

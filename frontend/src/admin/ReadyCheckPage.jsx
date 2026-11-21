@@ -13,7 +13,7 @@ async function runChecks() {
   const out = [];
   const add = (name, tone, text, fix) => out.push({ name, tone, text, fix });
   let pub = null;
-  try { pub = await j("/api/settings/public"); } catch { add("Server booth", "bad", "Server booth tidak menjawab.", "Tutup dan buka ulang aplikasi POPSNAP."); return out; }
+  try { pub = await j("/api/settings/public"); } catch { add("Server booth", "bad", "Server booth tidak menjawab.", "Tutup dan buka ulang aplikasi WENEVA."); return out; }
   add("Server booth", "ok", "Berjalan normal.");
 
   try {
@@ -64,7 +64,7 @@ async function runChecks() {
   // Printer
   const pr = pub.printing ?? {};
   if (!pr.enabled) add("Printer", "skip", "Fitur cetak dimatikan.");
-  else if (!canSilentPrint()) add("Printer", "skip", "Pemeriksaan printer hanya di aplikasi desktop POPSNAP (.exe).");
+  else if (!canSilentPrint()) add("Printer", "skip", "Pemeriksaan printer hanya di aplikasi desktop WENEVA (.exe).");
   else {
     const r = await listPrinters();
     const want = pr.main?.name;

@@ -8,7 +8,7 @@ const d = new Date(), DATE = `${d.getFullYear()}-${String(d.getMonth() + 1).padS
   fs.mkdirSync(path.join(OUT, DATE, "SESI-A1"), { recursive: true });
   fs.writeFileSync(path.join(OUT, DATE, "SESI-A1", "hasil.jpg"), "foto");
   const PORT = 4900 + Math.floor(Math.random() * 100), B = `http://127.0.0.1:${PORT}`;
-  const srv = spawn(process.execPath, [path.join(__dirname, "..", "server.js")], { env: { ...process.env, PORT: String(PORT), POPSNAP_DATA: DATA, OUTPUT_DIR: OUT }, stdio: ["ignore", "pipe", "pipe"] });
+  const srv = spawn(process.execPath, [path.join(__dirname, "..", "server.js")], { env: { ...process.env, PORT: String(PORT), WENEVA_DATA: DATA, OUTPUT_DIR: OUT }, stdio: ["ignore", "pipe", "pipe"] });
   let log = ""; srv.stdout.on("data", (x) => (log += x)); srv.stderr.on("data", (x) => (log += x));
   for (let i = 0; i < 60; i++) { try { await fetch(B + "/api/health"); break; } catch { await new Promise((r) => setTimeout(r, 250)); } }
   const finish = (consent) => fetch(B + "/api/session/finish", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sessionId: "SESI-A1", socialConsent: consent }) });

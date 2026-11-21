@@ -4,7 +4,7 @@ import { useKiosk } from "../hooks/useKiosk";
 import LiveView from "../components/LiveView";
 import useCamera from "../hooks/useCamera";
 import WelcomeDecor from "../components/WelcomeDecor";
-import logo from "../assets/logo-popsnap.png";
+import logo from "../assets/logo-weneva.png";
 import useShape from "../hooks/useShape";
 
 const MODES = [
@@ -33,7 +33,7 @@ export default function WelcomeScreen({ dispatch, settings, camera, singleTempla
   const d = settings?.display;
   const ss = d?.startScreen;
   const modes = settings?.general?.modes;
-  const title = settings?.event?.name || "POPSNAP";
+  const title = settings?.event?.name || "WENEVA";
   const subtitle = settings?.event?.subtitle ?? "";
   const storage = useStorage();
   const diskFull = storage.level === "critical"; // ruang disk habis: tidak menerima sesi baru
@@ -79,14 +79,16 @@ export default function WelcomeScreen({ dispatch, settings, camera, singleTempla
   const shape = useShape(); // portrait: kanvas 1080x1800, square: 1200x1200, landscape: 1728x1117
   const P = (l, p, q = l) => (shape === "portrait" ? p : shape === "square" ? q : l);
   const U = (n) => `calc(var(--u) * ${n})`; // 1 = 1px pada kanvas desain (landscape 1728x1117 / portrait 1080x1800)
+  const land = P(1, 0, 0) === 1;
   const W = P(1728, 1080, 1200);
-  const logoW = P(300, 420, 320), logoTop = P(120, 390, 110), logoH = logoW * 0.624; // logo monogram rasio 508:317
-  const wordTop = logoTop + logoH + P(34, 44, 34);
-  const headTop = wordTop + P(120, 150, 112), headW = P(1180, 1000, 1000);
-  const ctaW = P(440, 580, 540), ctaH = P(104, 132, 124), ctaTop = P(800, 1190, 860);
-  const msgTop = ctaTop + ctaH + P(34, 44, 34), modesTop = msgTop + P(80, 110, 90);
-  const headline = subtitle?.trim() || "Abadikan momenmu";
-  const tagline = subtitle?.trim() ? "" : "Sentuh tombol di bawah untuk memulai";
+  const words = (subtitle?.trim() || "Abadikan momenmu").split(/\s+/);
+  const cut = Math.ceil(words.length / 2), w1 = words.slice(0, cut).join(" "), w2 = words.slice(cut).join(" ");
+  const wordFs = P(112, 188, 124), pillW = P(340, 640, 470), pillH = P(206, 300, 210);
+  const chipTop = P(100, 250, 78), stackTop = P(230, 340, 150), stackH = P(340, 860, 560);
+  const ctaH = P(104, 136, 118), ctaTop = P(660, 1250, 770), msgTop = ctaTop + ctaH + P(34, 48, 36);
+  const modesTop = msgTop + P(80, 110, 90), stepsTop = P(950, 1600, 1030);
+  const payMode = settings?.payment?.mode, printOn = !!settings?.printing?.enabled;
+  const steps = ["Pilih template", payMode === "none" ? null : "Bayar QRIS", printOn ? "Foto & cetak" : "Foto"].filter(Boolean);
 
   return (
     <div className="kiosk-screen strip-screen h-full w-full overflow-hidden" data-shape={shape} style={customBg ? { background: customBg } : undefined}>
@@ -95,33 +97,42 @@ export default function WelcomeScreen({ dispatch, settings, camera, singleTempla
 
       {/* Chip kamera + tombol layar penuh. Bergeser kalau gembok diletakkan di pojok kiri-atas. */}
       <div className={`absolute z-20 top-3 sm:top-5 flex items-center gap-2 ${d?.lock?.position === "top-left" ? "left-16 sm:left-20" : "left-3 sm:left-5"}`}>
-        <div className="flex items-center gap-2 bg-white/[0.06] border border-white/15 backdrop-blur px-3 py-1.5 rounded-full text-xs sm:text-sm font-semibold" role="status">
+        <div className="flex items-center gap-2 bg-white/80 border border-black/10 text-[#17171A] backdrop-blur px-3 py-1.5 rounded-full text-xs sm:text-sm font-semibold" role="status">
           <span className={`w-2.5 h-2.5 rounded-full ${badge.dot}`} />
           {badge.text}
         </div>
         {!kiosk.fullscreen && (
-          <button data-kiosk-control onClick={kiosk.enterFullscreen} aria-label="Layar penuh" title="Layar penuh (F11)" className="w-8 h-8 rounded-full bg-black/25 hover:bg-black/40 flex items-center justify-center">
+          <button data-kiosk-control onClick={kiosk.enterFullscreen} aria-label="Layar penuh" title="Layar penuh (F11)" className="w-8 h-8 rounded-full bg-white/80 text-[#17171A] border border-black/10 hover:bg-white flex items-center justify-center">
             <Icon size={16} path="M4 9V4h5 M20 9V4h-5 M4 15v5h5 M20 15v5h-5" />
           </button>
         )}
       </div>
 
       <div className="strip-stage">
-        {/* Tata letak "Elegan": satu poros tengah. Logo -> nama -> judul serif -> satu tombol. Banyak ruang kosong, tanpa dekorasi ramai. */}
-        <img src={logo} alt={title} draggable={false} className="select-none" style={{ left: U((W - logoW) / 2), top: U(logoTop), width: U(logoW), height: "auto", filter: "drop-shadow(0 12px 28px rgba(0,0,0,.45))" }} />
-        <p className="eyebrow text-center" style={{ left: 0, width: "100%", top: U(wordTop), fontSize: U(P(26, 30, 26)), margin: 0 }}>{title}</p>
-        <div style={{ left: U(W / 2 - 36), top: U(wordTop + P(62, 70, 62)), width: U(72), height: U(2), background: "var(--red)", opacity: 0.9 }} />
-        <h1 className="display-hero text-center" style={{ left: U((W - headW) / 2), width: U(headW), top: U(headTop), fontSize: U(P(92, 98, 88)), margin: 0 }}>{headline}</h1>
-        {tagline && <p className="text-center" style={{ left: U((W - headW) / 2), width: U(headW), top: U(headTop + P(140, 150, 140)), fontSize: U(P(30, 36, 30)), margin: 0, color: "rgba(246,241,234,.66)", fontWeight: 500, letterSpacing: ".01em" }}>{tagline}</p>}
+        {/* Tata letak "Krem": chip merek -> judul tebal yang diselingi gambar pil -> satu tombol pil -> tiga langkah. */}
+        <div className="hero-chip" style={{ top: U(chipTop) }}><span>{title}</span></div>
+        <div className="hero-stack" style={{ top: U(stackTop), height: U(stackH), flexDirection: land ? "row" : "column", gap: U(P(44, 26, 30)) }}>
+          <span className="hero-word" style={{ fontSize: U(wordFs) }}>{w1}</span>
+          <div className="hero-pill" style={{ width: U(pillW), height: U(pillH) }}>
+            <img src={logo} alt={title} draggable={false} className="select-none" style={{ height: U(pillH * 0.6) }} />
+          </div>
+          {w2 && <span className="hero-word" style={{ fontSize: U(wordFs) }}>{w2}</span>}
+        </div>
 
-        <button onClick={() => start("photo")} disabled={!ready} aria-label="Mulai" className="start-cta"
-          style={{ left: U((W - ctaW) / 2), top: U(ctaTop), width: U(ctaW), height: U(ctaH), fontSize: U(P(46, 58, 52)) }}>
-          <span>Mulai</span>
-          <svg width={`calc(var(--u) * ${P(40, 50, 46)})`} height={`calc(var(--u) * ${P(40, 50, 46)})`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
-        </button>
+        <div className="hero-cta-row" style={{ top: U(ctaTop) }}>
+          <button onClick={() => start("photo")} disabled={!ready} aria-label="Mulai" className="start-cta" style={{ height: U(ctaH), fontSize: U(P(54, 66, 58)) }}>
+            <span>Mulai</span>
+            <span className="start-cta__go" style={{ width: U(ctaH - 28), height: U(ctaH - 28) }}>
+              <svg width={`calc(var(--u) * ${P(40, 50, 44)})`} height={`calc(var(--u) * ${P(40, 50, 44)})`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M7 17L17 7M8 7h9v9" /></svg>
+            </span>
+          </button>
+        </div>
+        <div className="hero-steps" style={{ top: U(stepsTop) }}>
+          {steps.map((t, i) => <span key={t}><b>{i + 1}</b>{t}</span>)}
+        </div>
 
         {diskFull && (
-          <p className="text-center font-semibold text-[#FFB4A6]" style={{ left: U(60), width: U(P(1728, 1080, 1200) - 120), top: U(extraModes.length ? modesTop + P(40, 60, 50) : msgTop), fontSize: U(P(30, 40, 36)), margin: 0 }}>Booth sedang tidak dapat digunakan. Silakan hubungi CS.</p>
+          <p className="text-center font-semibold text-[#C2321B]" style={{ left: U(60), width: U(P(1728, 1080, 1200) - 120), top: U(extraModes.length ? modesTop + P(40, 60, 50) : msgTop), fontSize: U(P(30, 40, 36)), margin: 0 }}>Booth sedang tidak dapat digunakan. Silakan hubungi CS.</p>
         )}
 
         {extraModes.length > 0 && (
@@ -137,13 +148,13 @@ export default function WelcomeScreen({ dispatch, settings, camera, singleTempla
 
         {camReady && booth.blocked && (
           <div className="flex flex-col items-center" style={{ left: 0, width: "100%", top: U(msgTop) }}>
-            <p className="bg-black/40 rounded-xl text-center" style={{ fontSize: U(P(22, 32, 28)), padding: `${U(8)} ${U(20)}`, maxWidth: U(P(700, 900, 800)) }}>{booth.reason}</p>
+            <p className="bg-white border border-black/10 text-[#C2321B] font-semibold rounded-2xl text-center" style={{ fontSize: U(P(22, 32, 28)), padding: `${U(8)} ${U(20)}`, maxWidth: U(P(700, 900, 800)) }}>{booth.reason}</p>
           </div>
         )}
 
         {!camReady && camera.status !== "checking" && (
           <div className="flex flex-col items-center" style={{ left: 0, width: "100%", top: U(msgTop), gap: U(P(10, 16, 14)) }}>
-            <p className="bg-black/40 rounded-xl text-center" style={{ fontSize: U(P(22, 32, 28)), padding: `${U(8)} ${U(20)}`, maxWidth: U(P(700, 900, 800)) }}>{camera.detail}</p>
+            <p className="bg-white border border-black/10 text-[#C2321B] font-semibold rounded-2xl text-center" style={{ fontSize: U(P(22, 32, 28)), padding: `${U(8)} ${U(20)}`, maxWidth: U(P(700, 900, 800)) }}>{camera.detail}</p>
             <button onClick={camera.retry} className="strip-btn strip-btn--next" style={{ height: U(P(52, 76, 64)), padding: `0 ${U(P(28, 40, 34))}`, fontSize: U(P(22, 32, 28)) }}>Coba lagi</button>
           </div>
         )}

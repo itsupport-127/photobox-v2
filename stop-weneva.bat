@@ -1,9 +1,9 @@
 @echo off
-title POPSNAP - Stop
+title WENEVA - Stop
 color 0C
 
 echo ===================================
-echo   Menghentikan semua proses POPSNAP
+echo   Menghentikan semua proses WENEVA
 echo ===================================
 echo.
 

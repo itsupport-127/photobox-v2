@@ -1,4 +1,4 @@
-# POPSNAP Cloud Dashboard — Server Pusat
+# WENEVA Cloud Dashboard — Server Pusat
 
 Server terpisah buat kamu (owner/pusat) pantau **semua toko sekaligus** dari 1 tempat.
 
@@ -39,7 +39,7 @@ Simpan sebagai `JWT_SECRET` di `.env` dashboard ini.
 3. Di Settings project, tambahkan Environment Variables:
    - `SYNC_API_KEY` = (hasil generate langkah 1)
    - `JWT_SECRET` = (hasil generate langkah 2)
-4. Railway otomatis kasih URL publik, misal `https://popsnap-dashboard.up.railway.app`
+4. Railway otomatis kasih URL publik, misal `https://weneva-dashboard.up.railway.app`
 5. Buka URL itu di browser → akan muncul wizard setup akun owner pertama kali
 
 ## Deploy ke Render (alternatif, juga ada free tier)
@@ -54,7 +54,7 @@ Simpan sebagai `JWT_SECRET` di `.env` dashboard ini.
 
 Di **tiap toko**, edit `backend/.env`:
 ```
-CLOUD_SYNC_URL=https://popsnap-dashboard.up.railway.app
+CLOUD_SYNC_URL=https://weneva-dashboard.up.railway.app
 CLOUD_SYNC_API_KEY=<API_KEY_yang_sama_seperti_di_atas>
 ```
 Restart backend toko itu. Dalam waktu maksimal 5 menit, toko itu akan muncul

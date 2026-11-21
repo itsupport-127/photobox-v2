@@ -107,7 +107,7 @@ export default function ActivityPage() {
   const set = (patch) => setFilters((f) => ({ ...f, ...patch }));
 
   async function exportCsv() {
-    const target = await chooseSaveTarget(`log-aktivitas-${new Date().toISOString().slice(0, 10)}.csv`, { description: "Log aktivitas (CSV)", mime: "text/csv", ext: ".csv", idKey: "popsnap-reports" });
+    const target = await chooseSaveTarget(`log-aktivitas-${new Date().toISOString().slice(0, 10)}.csv`, { description: "Log aktivitas (CSV)", mime: "text/csv", ext: ".csv", idKey: "weneva-reports" });
     if (!target) return;
     const header = ["Waktu", "Pengguna", "Aksi", "Objek", "Rincian", "IP"];
     const lines = rows.map((r) => [fmtTime(r.at), r.username, (ACTIONS[r.action]?.[0]) || r.action, r.target, describe(r.detail), r.ip].map(csvCell).join(","));

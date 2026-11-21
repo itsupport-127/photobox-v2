@@ -180,13 +180,13 @@ export default function StickerStep({ session, dispatch, photoAssignment, timerT
         <div className="pay-timer" role="timer" style={{ left: U(L.timer.left), top: U(L.timer.top), width: U(161), height: U(40), fontSize: U(28) }}>{timerText}</div>
 
         {/* Kartu putih + garis pemisah */}
-        <div style={{ left: U(L.card.left), top: U(L.card.top), width: U(L.card.width), height: U(L.card.height), background: "#fff", border: "3px solid #000", borderRadius: U(72.5), boxSizing: "border-box" }} />
+        <div style={{ left: U(L.card.left), top: U(L.card.top), width: U(L.card.width), height: U(L.card.height), background: "#fff", border: "1px solid rgba(23,23,26,.14)", borderRadius: U(72.5), boxSizing: "border-box" }} />
         <div style={{ left: U(L.divider.left), top: U(L.divider.top), width: L.divider.width > 1 ? U(L.divider.width) : 1, height: L.divider.height > 1 ? U(L.divider.height) : 1, background: "#CECECE" }} />
 
         {/* Bingkai template (area tujuan stiker) */}
         <div style={{ left: U(PREVIEW_BOX.x), top: U(PREVIEW_BOX.y), width: U(PREVIEW_BOX.w), height: U(PREVIEW_BOX.h), display: "flex", alignItems: "center", justifyContent: "center" }}>
           <div ref={frameRef} onClick={onFrameClick} className="relative"
-            style={{ width: U(frame.w), height: U(frame.h), boxShadow: drag?.over ? "0 0 0 3px #E02843" : armed ? "0 0 0 3px #FDB533" : "0 2px 10px rgba(0,0,0,.25)", cursor: armed ? "crosshair" : "default", touchAction: "none" }}>
+            style={{ width: U(frame.w), height: U(frame.h), boxShadow: drag?.over ? "0 0 0 3px #FF5F45" : armed ? "0 0 0 3px #FF5F45" : "0 2px 10px rgba(0,0,0,.25)", cursor: armed ? "crosshair" : "default", touchAction: "none" }}>
             {/* Lapisan terpotong: template + stiker (sama dengan hasil akhir yang dipotong tepi kanvas) */}
             <div className="absolute inset-0 overflow-hidden" style={{ ...containerStyle, background: template?.backgroundColor || "#fff" }}>
               {layers.filter((l) => l.visible !== false).map((layer) => {
@@ -202,7 +202,7 @@ export default function StickerStep({ session, dispatch, photoAssignment, timerT
                 <div key={st.id} onPointerDown={(e) => beginMove(e, st)} onClick={(e) => e.stopPropagation()}
                   style={{ position: "absolute", left: `${st.x}%`, top: `${st.y}%`, width: `${st.w}%`, aspectRatio: `${st.ar || 1}`, transform: `translate(-50%, -50%) rotate(${st.rot || 0}deg)`, cursor: "move", touchAction: "none", zIndex: st.id === selected ? 8 : 6 }}>
                   <img src={st.src} alt="" draggable={false} style={{ width: "100%", height: "100%", objectFit: "contain", pointerEvents: "none", display: "block" }} />
-                  {st.id === selected && <div style={{ position: "absolute", inset: 0, border: "2px dashed #E02843", pointerEvents: "none" }} />}
+                  {st.id === selected && <div style={{ position: "absolute", inset: 0, border: "2px dashed #FF5F45", pointerEvents: "none" }} />}
                 </div>
               ))}
             </div>
@@ -211,12 +211,12 @@ export default function StickerStep({ session, dispatch, photoAssignment, timerT
             {stickers.filter((st) => st?.src && st.id === selected).map((st) => (
               <div key={`ctl-${st.id}`} style={{ position: "absolute", left: `${st.x}%`, top: `${st.y}%`, width: `${st.w}%`, aspectRatio: `${st.ar || 1}`, transform: `translate(-50%, -50%) rotate(${st.rot || 0}deg)`, pointerEvents: "none", zIndex: 9 }}>
                 <button type="button" aria-label="Hapus stiker" onPointerDown={(e) => e.stopPropagation()} onClick={(e) => { e.stopPropagation(); remove(st.id); }}
-                  style={{ position: "absolute", left: 0, top: 0, width: U(36), height: U(36), transform: "translate(-50%, -50%)", borderRadius: "50%", background: "#E02843", border: "1px solid #000", display: "flex", alignItems: "center", justifyContent: "center", padding: 0, pointerEvents: "auto" }}>
-                  <X color="#fff" strokeWidth={3.5} style={{ width: U(20), height: U(20) }} />
+                  style={{ position: "absolute", left: 0, top: 0, width: U(36), height: U(36), transform: "translate(-50%, -50%)", borderRadius: "50%", background: "#FF5F45", border: "1px solid rgba(23,23,26,.14)", display: "flex", alignItems: "center", justifyContent: "center", padding: 0, pointerEvents: "auto" }}>
+                  <X color="#17171A" strokeWidth={3.5} style={{ width: U(20), height: U(20) }} />
                 </button>
                 <div role="slider" aria-label="Ubah ukuran dan putar" onPointerDown={(e) => beginResize(e, st)}
-                  style={{ position: "absolute", right: 0, bottom: 0, width: U(36), height: U(36), transform: "translate(50%, 50%)", borderRadius: "50%", background: "#fff", border: "2px solid #E02843", display: "flex", alignItems: "center", justifyContent: "center", cursor: "nwse-resize", touchAction: "none", pointerEvents: "auto" }}>
-                  <RotateCw color="#E02843" strokeWidth={3} style={{ width: U(20), height: U(20) }} />
+                  style={{ position: "absolute", right: 0, bottom: 0, width: U(36), height: U(36), transform: "translate(50%, 50%)", borderRadius: "50%", background: "#fff", border: "2px solid #FF5F45", display: "flex", alignItems: "center", justifyContent: "center", cursor: "nwse-resize", touchAction: "none", pointerEvents: "auto" }}>
+                  <RotateCw color="#FF5F45" strokeWidth={3} style={{ width: U(20), height: U(20) }} />
                 </div>
               </div>
             ))}
@@ -228,7 +228,7 @@ export default function StickerStep({ session, dispatch, photoAssignment, timerT
           <div style={{ left: U(L.tabs.left), top: U(tabTop), width: U(L.tabs.width), display: "flex", gap: U(10), flexWrap: "nowrap", overflowX: "auto", scrollbarWidth: "none" }}>
             {[{ id: "all", label: "Semua" }, ...cats.map((c) => ({ id: c.id, label: c.label })), ...(lib?.uncategorized ? [{ id: "none", label: "Lainnya" }] : [])].map((c) => (
               <button key={c.id} type="button" onClick={() => setCat(c.id)}
-                style={{ flex: "none", height: U(40), padding: `0 ${U(22)}`, borderRadius: 9999, border: "1px solid #000", fontSize: U(22), fontStyle: "italic", fontWeight: 700, background: cat === c.id ? "#E02843" : "#FFEAC5", color: cat === c.id ? "#fff" : "#000", whiteSpace: "nowrap" }}>
+                style={{ flex: "none", height: U(40), padding: `0 ${U(22)}`, borderRadius: 9999, border: "1px solid rgba(23,23,26,.14)", fontSize: U(22), fontWeight: 700, background: cat === c.id ? "#FF5F45" : "#FFFFFF", color: cat === c.id ? "#fff" : "#000", whiteSpace: "nowrap" }}>
                 {c.label}
               </button>
             ))}
@@ -241,29 +241,29 @@ export default function StickerStep({ session, dispatch, photoAssignment, timerT
             {shown.map((s) => (
               <button key={s.id} type="button" title={s.name} aria-label={`Stiker ${s.name || ""}`} onClick={() => onTileClick(s)} onPointerDown={(e) => beginPaletteDrag(e, s)}
                 style={{ width: U(CELL), height: U(CELL), padding: U(4), border: 0, borderRadius: U(16), boxSizing: "border-box", touchAction: "none",
-                  background: armed?.id === s.id ? "#FDE8EB" : "transparent", outline: armed?.id === s.id ? `${U(3)} solid #E02843` : "none" }}>
+                  background: armed?.id === s.id ? "#FDE8EB" : "transparent", outline: armed?.id === s.id ? `${U(3)} solid #FF5F45` : "none" }}>
                 <img src={s.url} alt="" draggable={false} style={{ width: "100%", height: "100%", objectFit: "contain", pointerEvents: "none" }} />
               </button>
             ))}
           </div>
-          {lib && shown.length === 0 && <p style={{ textAlign: "center", color: "#55606E", fontStyle: "italic", fontSize: U(26) }}>Belum ada stiker di kategori ini.</p>}
+          {lib && shown.length === 0 && <p style={{ textAlign: "center", color: "#55606E", fontSize: U(26) }}>Belum ada stiker di kategori ini.</p>}
         </div>
 
         <ScrollButtons scrollRef={listRef} deps={shown.length} size={46}
           up={{ left: L.scroll.x, top: gridTop }} down={{ left: L.scroll.x, top: L.scroll.downTop }} track={{ left: L.scroll.trackX, top: gridTop + 56, height: L.scroll.downTop - gridTop - 66 }} />
 
-        <p style={{ left: U(L.hint.left), top: U(L.hint.top), width: U(L.hint.width), margin: 0, whiteSpace: "nowrap", fontSize: U(22), fontStyle: "italic", fontWeight: 600, color: "#55606E" }}>
+        <p style={{ left: U(L.hint.left), top: U(L.hint.top), width: U(L.hint.width), margin: 0, whiteSpace: "nowrap", fontSize: U(22), fontWeight: 600, color: "#55606E" }}>
           {armed ? "Ketuk lokasi di foto untuk menaruh stiker" : "Seret stiker ke foto, atau ketuk stiker lalu ketuk lokasinya"}
         </p>
 
         {/* Kembali (ke filter) & selesai */}
         <button type="button" className="strip-btn" aria-label="Kembali" onClick={onBack}
           style={{ left: U(L.back.left), top: U(L.back.top), width: U(97), height: U(97), padding: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <ChevronLeft color="#fff" strokeWidth={3.4} style={{ width: U(52), height: U(52) }} />
+          <ChevronLeft color="#17171A" strokeWidth={3.4} style={{ width: U(52), height: U(52) }} />
         </button>
         <button type="button" className="strip-btn" aria-label="Selesai" onClick={onFinish}
           style={{ left: U(L.finish.left), top: U(L.finish.top), width: U(97), height: U(97), padding: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <Check color="#fff" strokeWidth={4} style={{ width: U(54), height: U(54) }} />
+          <Check color="#17171A" strokeWidth={4} style={{ width: U(54), height: U(54) }} />
         </button>
       </div>
 
