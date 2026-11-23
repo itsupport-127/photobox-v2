@@ -2,16 +2,17 @@ import useShape from "../hooks/useShape";
 import React, { useEffect, useRef, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import appConfig from "../config/appConfig";
+import { flatPrice, previousStep } from "../state/sessionMachine";
 import useCountdown from "../hooks/useCountdown";
 import { createQrisPayment, checkPaymentStatus, validateVoucher, quoteDiscount } from "../services/paymentService";
 import { getPublicSettings } from "../services/settingsService";
 import OnScreenKeyboard from "../components/OnScreenKeyboard";
-import useCodeEntry, { extractCode } from "../hooks/useCodeEntry";
+import useCodeEntry, { extractCode, CODE_MAX } from "../hooks/useCodeEntry";
 import StepBadge from "../components/StepBadge";
 import StripNotice from "../components/StripNotice";
 import TemplateDecor from "../components/TemplateDecor";
 import { PAYMENT_ICONS } from "../components/paymentIcons";
-import logo from "../assets/logo-weneva.png";
+import BrandLogo from "../components/BrandLogo";
 
 /**
  * Tahap 4: Pembayaran (QRIS / voucher), batas waktu 45 detik.
@@ -22,6 +23,7 @@ import logo from "../assets/logo-weneva.png";
  *          ke database lokal (bisa offline).
  */
 export default function PaymentScreen({ session, dispatch }) {
+  const flat = session.mode === "photo" && !session.selectedTemplate; // bayar dulu: template belum dipilih, harga tetap per sesi
   const [voucherInput, setVoucherInput] = useState("");
   const [voucherError, setVoucherError] = useState(null);
   const [qrisData, setQrisData] = useState(null);
@@ -48,7 +50,7 @@ export default function PaymentScreen({ session, dispatch }) {
   useEffect(() => {
     if (!discountOn || session.mode !== "photo" && !session.price) return;
     let cancelled = false;
-    quoteDiscount({ templateId: session.selectedTemplate?.id, mode: session.mode }).then((q) => { if (!cancelled && q?.enabled && q.ok && q.discount > 0) setQuote(q); });
+    quoteDiscount({ templateId: session.selectedTemplate?.id, mode: session.mode, flat }).then((q) => { if (!cancelled && q?.enabled && q.ok && q.discount > 0) setQuote(q); });
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [discountOn]);
@@ -67,7 +69,8 @@ export default function PaymentScreen({ session, dispatch }) {
   }, [methods, session.paymentMethod]);
 
   // Mode foto: kembali ke pilih template (kecuali template sudah ditentukan admin). Mode lain: batalkan sesi.
-  const goBack = () => dispatch({ type: session.mode === "photo" && !session.autoTemplate ? "BACK_TO_TEMPLATE_SELECT" : "CANCEL_SESSION" });
+  const backToTemplates = previousStep(session, "payment") === "template"; // bayar dulu / langkah lain di depan: Kembali = batalkan sesi
+  const goBack = () => dispatch({ type: backToTemplates ? "BACK_TO_TEMPLATE_SELECT" : "CANCEL_SESSION" });
   // Layar "Waktu pembayaran habis" tidak boleh menunggu selamanya kalau tamu sudah pergi: kembali otomatis setelah 30 detik
   useEffect(() => {
     if (session.paymentStatus !== "expired") return;
@@ -79,7 +82,7 @@ export default function PaymentScreen({ session, dispatch }) {
   const kbMode = appConfig.settings?.general?.virtualKeyboard ?? "off"; // off | builtin | windows
   const useKeyboard = kbMode === "builtin";
   const voucherInputRef = useRef(null);
-  const price = session.mode === "photo" ? session.selectedTemplate?.price : session.price;
+  const price = session.mode === "photo" ? (session.selectedTemplate ? session.selectedTemplate.price : flatPrice()) : session.price;
   const MODE_NAME = { photo: "Foto", gif: "GIF", boomerang: "Boomerang", video: "Video" };
 
   // QRIS lunas: tampilkan "Payment successful" sebentar sebelum lanjut; hitung mundur dihentikan supaya tidak kedaluwarsa di jeda ini
@@ -108,7 +111,7 @@ export default function PaymentScreen({ session, dispatch }) {
     setQrisError(null);
     setQrisData(null);
     try {
-      const payment = await createQrisPayment({ templateId: session.selectedTemplate?.id, mode: session.mode, discountCode: discountCodeRef.current });
+      const payment = await createQrisPayment({ templateId: session.selectedTemplate?.id, flat, mode: session.mode, discountCode: discountCodeRef.current });
       setQrisData(payment);
       pollPayment(payment.orderId);
     } catch (err) {
@@ -146,7 +149,7 @@ export default function PaymentScreen({ session, dispatch }) {
   useCodeEntry({
     active: session.paymentMethod === "voucher" && session.paymentStatus !== "expired",
     setValue: (fn) => { setVoucherInput(fn); setVoucherError(null); },
-    maxLength: 12,
+    maxLength: CODE_MAX,
     onSubmit: () => handleVoucherSubmit(),
     inputRef: voucherInputRef,
   });
@@ -158,7 +161,7 @@ export default function PaymentScreen({ session, dispatch }) {
     try {
       // Di aplikasi desktop (.exe) baca lewat proses utama; navigator.clipboard hanya cadangan (browser biasa)
       const raw = window.electronAPI?.kiosk?.readClipboard ? await window.electronAPI.kiosk.readClipboard() : await navigator.clipboard.readText();
-      const code = extractCode(raw, 12);
+      const code = extractCode(raw, CODE_MAX);
       if (!code) return setPasteMsg("Clipboard kosong.");
       setVoucherInput(code);
       setVoucherError(null);
@@ -174,14 +177,14 @@ export default function PaymentScreen({ session, dispatch }) {
 
   async function handleVoucherSubmit() {
     if (!voucherInput.trim()) return setVoucherError("Masukkan kode voucher dulu.");
-    const result = await validateVoucher(voucherInput, { templateId: session.selectedTemplate?.id, mode: session.mode });
+    const result = await validateVoucher(voucherInput, { templateId: session.selectedTemplate?.id, flat, mode: session.mode });
     if (result.valid) {
       dispatch({ type: "PAYMENT_SUCCESS", payload: { sessionId: result.orderNo || `VCH-${voucherInput}` } });
       return;
     }
     // Bukan voucher bayar-di-kasir: coba sebagai KODE DISKON kasir (hanya kalau diskon dinyalakan & kasir terjangkau)
     if (discountOn && /tidak ditemukan|tidak aktif/i.test(result.reason || "")) {
-      const q = await quoteDiscount({ templateId: session.selectedTemplate?.id, mode: session.mode, code: voucherInput.trim() });
+      const q = await quoteDiscount({ templateId: session.selectedTemplate?.id, flat, mode: session.mode, code: voucherInput.trim() });
       if (q?.enabled && q.ok && q.code) {
         setQuote(q);
         return handleSelectQris(voucherInput.trim().toUpperCase()); // lanjut ke QR dengan harga setelah diskon
@@ -196,7 +199,7 @@ export default function PaymentScreen({ session, dispatch }) {
   if (methods?.[0] === "free") return null; // tanpa pembayaran: tidak ada layar bayar (langsung diteruskan oleh efek di atas)
 
   if (session.paymentStatus === "expired") {
-    const toTemplates = session.mode === "photo" && !session.autoTemplate;
+    const toTemplates = backToTemplates;
     return (
       <StripNotice
         title="Waktu pembayaran habis"
@@ -285,7 +288,7 @@ function PaymentSelect({ priceText, remaining, onBack, onQr, onVoucher, qrOfflin
       <TemplateDecor />
       <StepBadge step={4} time={`${remaining}s`} />
       <div className="strip-stage">
-        <img src={logo} alt="Weneva" draggable={false} className="strip-logo" style={{ left: U(L.logo.left), top: U(L.logo.top), width: U(L.logo.width) }} />
+        <BrandLogo draggable={false} className="strip-logo" style={{ left: U(L.logo.left), top: U(L.logo.top), width: U(L.logo.width) }} />
 
         <h2 className="pay-title" style={{ left: U(L.title.left), top: U(L.title.top), width: U(L.title.width), height: U(96), fontSize: U(L.title.fs) }}>Select your payment</h2>
         {priceText && <p className="pay-price" style={{ left: U(L.price.left), top: U(L.price.top), width: U(L.price.width), fontSize: U(30) }}>{priceText}</p>}
@@ -315,7 +318,7 @@ function PayFrame({ title, titleBox, panel, tray, trayRadius, timerPos, remainin
     <div className="kiosk-screen strip-screen h-full w-full overflow-hidden" data-shape={shape}>
       <TemplateDecor glow={glow} />
       <div className="strip-stage">
-        <img src={logo} alt="Weneva" draggable={false} className="strip-logo" style={{ left: U(logoPos.left), top: U(logoPos.top), width: U(logoPos.width) }} />
+        <BrandLogo draggable={false} className="strip-logo" style={{ left: U(logoPos.left), top: U(logoPos.top), width: U(logoPos.width) }} />
         <h2 className="pay-title" style={{ left: U(titleBox.left), top: U(titleBox.top), width: U(titleBox.w), height: U(titleBox.h), fontSize: U(titleBox.fs) }}>{title}</h2>
 
         <div className="strip-panel" style={{ left: U(panel.left), top: U(panel.top), width: U(panel.w), height: U(panel.h) }} />
@@ -426,7 +429,7 @@ function PaymentVoucher({ qrisDown, value, onChange, error, onSubmit, onBack, re
           <button onClick={onPaste} className="pay-mini" style={{ left: U(pasteLeft), top: U(V.paste.top), width: U(141), height: U(38), fontSize: U(22) }}>📋 Tempel</button>
           {showWinKb && <button onClick={() => window.electronAPI.kiosk.showTouchKeyboard()} className="pay-mini" style={{ left: U(pasteLeft + 161), top: U(V.kbBtn.top), width: U(180), height: U(38), fontSize: U(22) }}>⌨ Keyboard</button>}
           {(error || pasteMsg) && <p className="pay-error" style={{ left: U(V.err.left), width: U(V.err.width), top: U(V.err.top), fontSize: U(26) }}>{error || pasteMsg}</p>}
-          {useKeyboard && <div style={{ left: U(V.kb.left), top: U(V.kb.top), width: U(V.kb.width) }}><OnScreenKeyboard scaled {...V.kbSize} value={value} maxLength={12} onChange={onChange} /></div>}
+          {useKeyboard && <div style={{ left: U(V.kb.left), top: U(V.kb.top), width: U(V.kb.width) }}><OnScreenKeyboard scaled extended {...V.kbSize} value={value} maxLength={CODE_MAX} onChange={onChange} /></div>}
         </>
       }
     >
@@ -435,7 +438,7 @@ function PaymentVoucher({ qrisDown, value, onChange, error, onSubmit, onBack, re
           ref={inputRef}
           type="text"
           aria-label="Kode voucher"
-          maxLength={12}
+          maxLength={CODE_MAX}
           autoFocus={!useKeyboard}
           readOnly={useKeyboard}
           inputMode={useKeyboard ? "none" : undefined}

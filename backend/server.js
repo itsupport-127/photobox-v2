@@ -12,6 +12,7 @@
 // VITE_SIMULATE_PAYMENT=false tanpa ubah UI.
 // ==========================================================
 require("./envCompat"); // POPSNAP_* (nama lama) -> WENEVA_*
+require("./appLog").install(process.env.WENEVA_DATA || __dirname); // log ke file per tanggal (alat Log aplikasi di Remote)
 const express = require("express");
 const cors = require("cors");
 const multer = require("multer");
@@ -726,11 +727,29 @@ function listStickers() {
   const categories = db.prepare(`SELECT c.id, c.label, (SELECT COUNT(*) FROM stickers s WHERE s.category_id = c.id) AS count FROM sticker_categories c ORDER BY c.sort, c.rowid`).all();
   const stickers = db.prepare("SELECT id, category_id, name, file, width, height FROM stickers ORDER BY sort, rowid").all()
     .map((s) => ({ id: s.id, categoryId: s.category_id, name: s.name, url: toFullUrl(`/uploads/${s.file}`), width: s.width, height: s.height }));
-  return { categories, uncategorized: stickers.filter((s) => !s.categoryId).length, stickers };
+  return { categories, uncategorized: stickers.filter((s) => !s.categoryId).length, stickers, builtin: builtinStickerCfg() };
+}
+// Stiker bawaan (gambar vektor di aplikasi): mode "auto" = hanya dipakai bila belum ada stiker unggahan, "on" = selalu tampil bersama stikermu, "off" = tidak tampil.
+// hidden = daftar id stiker bawaan yang disembunyikan satu per satu.
+function builtinStickerCfg() {
+  try {
+    const v = JSON.parse(db.prepare("SELECT value FROM app_settings WHERE key = 'stickers_builtin'").get()?.value || "{}");
+    return { mode: ["auto", "on", "off"].includes(v.mode) ? v.mode : "auto", hidden: Array.isArray(v.hidden) ? v.hidden.filter((x) => typeof x === "string").slice(0, 100) : [] };
+  } catch { return { mode: "auto", hidden: [] }; }
 }
 const cleanStickerText = (v, max) => (typeof v === "string" ? v.replace(/\s+/g, " ").trim().slice(0, max) : "");
 
 app.get("/api/stickers", (req, res) => res.json(listStickers()));
+app.put("/api/stickers-builtin", requirePerm("template.manage"), (req, res) => {
+  const b = req.body || {}, cur = builtinStickerCfg();
+  const next = {
+    mode: b.mode !== undefined ? (["auto", "on", "off"].includes(b.mode) ? b.mode : cur.mode) : cur.mode,
+    hidden: Array.isArray(b.hidden) ? [...new Set(b.hidden.filter((x) => typeof x === "string" && /^builtin-[a-z0-9_-]{1,30}$/.test(x)))].slice(0, 100) : cur.hidden,
+  };
+  db.prepare("INSERT INTO app_settings (key, value) VALUES ('stickers_builtin', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value").run(JSON.stringify(next));
+  logActivity(req.user, "sticker.builtin", "stiker bawaan", { mode: next.mode, disembunyikan: next.hidden.length }, req);
+  res.json(listStickers());
+});
 
 app.post("/api/stickers", requirePerm("template.manage"), upload.array("images", 40), (req, res) => {
   const files = req.files || [];
@@ -968,7 +987,7 @@ app.post("/api/templates/:id/audit", requirePerm("template.manage"), (req, res) 
 // (sisa dari template yang pernah dihapus). Aman dijalankan kapan saja karena
 // cuma hapus file yang beneran orphan — tapi disarankan pas gak ada sesi
 // konsumen yang lagi jalan (misal tutup toko), buat jaga-jaga.
-app.post("/api/templates/cleanup-orphaned-files", requirePerm("tools.maintenance"), (req, res) => {
+function cleanupOrphanedFiles() {
   const allTemplates = db.prepare("SELECT layers FROM templates").all();
   const usedFilenames = new Set();
   for (const row of allTemplates) {
@@ -1030,8 +1049,12 @@ app.post("/api/templates/cleanup-orphaned-files", requirePerm("tools.maintenance
     } catch (err) { skipped++; console.warn(`[cleanup-orphan] lewati ${filename}: ${err.code || err.message}`); }
   }
 
-  logActivity(req.user, "files.cleanup", "file tidak terpakai", { dihapus: deletedCount }, req);
-  res.json({ ok: true, deletedCount, skipped });
+  return { deletedCount, skipped };
+}
+app.post("/api/templates/cleanup-orphaned-files", requirePerm("tools.maintenance"), (req, res) => {
+  const r = cleanupOrphanedFiles();
+  logActivity(req.user, "files.cleanup", "file tidak terpakai", { dihapus: r.deletedCount }, req);
+  res.json({ ok: true, deletedCount: r.deletedCount, skipped: r.skipped });
 });
 
 // ---------- PENYIMPANAN: ukuran folder + bersihkan arsip lama ----------
@@ -1051,8 +1074,8 @@ function dirStats(dir) {
 }
 const DATE_DIR_RE = /^\d{4}-\d{2}-\d{2}$/;
 let storageCache = { at: 0, v: null };
-app.get("/api/storage", requirePerm("tools.maintenance"), (req, res) => {
-  if (!storageCache.v || Date.now() - storageCache.at > 20000 || req.query.fresh === "1") {
+function getStorage(fresh) {
+  if (!storageCache.v || Date.now() - storageCache.at > 20000 || fresh) {
     const out = outputDir();
     const days = [];
     try {
@@ -1074,13 +1097,14 @@ app.get("/api/storage", requirePerm("tools.maintenance"), (req, res) => {
       retentionDays: config.fileRetentionDays,
     } };
   }
-  res.json(storageCache.v);
-});
+  return storageCache.v;
+}
+app.get("/api/storage", requirePerm("tools.maintenance"), (req, res) => res.json(getStorage(req.query.fresh === "1")));
 
 // Hapus folder tanggal di arsip yang lebih tua dari N hari. Hanya folder bernama YYYY-MM-DD; folder lain tidak disentuh.
-app.post("/api/storage/archive-cleanup", requirePerm("tools.maintenance"), (req, res) => {
-  const days = Math.floor(Number(req.body?.olderThanDays));
-  if (!Number.isFinite(days) || days < 7 || days > 3650) return res.status(400).json({ error: "Isi batas hari antara 7 dan 3650." });
+function archiveCleanup(daysIn) {
+  const days = Math.floor(Number(daysIn));
+  if (!Number.isFinite(days) || days < 7 || days > 3650) return { status: 400, error: "Isi batas hari antara 7 dan 3650." };
   const cut = new Date(); cut.setHours(0, 0, 0, 0); cut.setDate(cut.getDate() - days);
   const cutoff = `${cut.getFullYear()}-${String(cut.getMonth() + 1).padStart(2, "0")}-${String(cut.getDate()).padStart(2, "0")}`;
   const out = outputDir();
@@ -1092,10 +1116,15 @@ app.post("/api/storage/archive-cleanup", requirePerm("tools.maintenance"), (req,
       const sz = dirStats(dir).bytes;
       try { fs.rmSync(dir, { recursive: true, force: true }); removedDays++; freed += sz; } catch (err) { failed++; console.warn(`[arsip] gagal hapus ${d}: ${err.code || err.message}`); }
     }
-  } catch (err) { return res.status(500).json({ error: `Folder arsip tidak bisa dibaca: ${err.code || err.message}` }); }
+  } catch (err) { return { status: 500, error: `Folder arsip tidak bisa dibaca: ${err.code || err.message}` }; }
   storageCache = { at: 0, v: null }; diskCache = { at: 0, v: null };
-  logActivity(req.user, "storage.archive-cleanup", "arsip foto lama", { lebihTuaDariHari: days, hariDihapus: removedDays, bytes: freed }, req);
-  res.json({ ok: true, removedDays, freedBytes: freed, failed, cutoff });
+  return { days, removedDays, freedBytes: freed, failed, cutoff };
+}
+app.post("/api/storage/archive-cleanup", requirePerm("tools.maintenance"), (req, res) => {
+  const r = archiveCleanup(req.body?.olderThanDays);
+  if (r.error) return res.status(r.status).json({ error: r.error });
+  logActivity(req.user, "storage.archive-cleanup", "arsip foto lama", { lebihTuaDariHari: r.days, hariDihapus: r.removedDays, bytes: r.freedBytes }, req);
+  res.json({ ok: true, removedDays: r.removedDays, freedBytes: r.freedBytes, failed: r.failed, cutoff: r.cutoff });
 });
 
 function formatTemplate(row) {
@@ -1155,7 +1184,9 @@ app.get("/api/settings/public", async (req, res) => {
   for (const o of [d.startScreen, d.capture, d.reminder]) {
     for (const k of ["image", "sayCheeseImage", "backgroundImage", "logoImage"]) if (o[k]) o[k] = toFullUrl(o[k]);
   }
+  if (d.brand?.logo) d.brand.logo = toFullUrl(d.brand.logo);
   for (const f of kiosk.editor?.filters ?? []) if (f.lut?.url) f.lut.url = toFullUrl(f.lut.url);
+  kiosk.flow = { steps: kiosk.general.flow.steps, payFirst: flatPriceInfo() };
   res.json({ storeName: store?.store_name, ...kiosk, payment: { mode: pay.mode, free: pay.mode === "none", methods: pay.methods, online: pay.online, simulate: !!pay.simulate, testPayment: pay.mode !== "voucher" && pay.mode !== "none" && !!pay.qrisConfigured && !pay.simulate && isTestPayment(), qrisDown: pay.mode !== "voucher" && pay.mode !== "none" && !pay.methods.includes("qris") && !!(pay.qrisConfigured || pay.simulate),
     discount: cloud.discountEnabled() && pay.methods.includes("qris") } });
 });
@@ -1490,6 +1521,27 @@ function priceFor(templateId, mode) {
   return t?.price || 0;
 }
 
+/**
+ * "Bayar dulu" (urutan langkah: bayar sebelum pilih template): hanya boleh kalau SEMUA template yang tampil di booth harganya sama
+ * (yang tampil = favorit, atau satu template saja bila Tampilan > Template diset "satu template"). Harga bersama itu = harga per sesi.
+ */
+/** Kode voucher/diskon dari tamu: huruf besar, spasi ganda dirapikan, maksimal 40 karakter (boleh berspasi & simbol). */
+const normCode = (v) => String(v ?? "").trim().replace(/\s+/g, " ").toUpperCase().slice(0, 40);
+
+function flatPriceInfo() {
+  const sc = settingsStore.load().display?.startScreen || {};
+  let rows = db.prepare("SELECT price FROM templates WHERE favorite = 1").all();
+  if (sc.templateChoice === "single") {
+    const one = db.prepare("SELECT price FROM templates WHERE id = ?").get(sc.singleTemplateId);
+    if (one) rows = [one];
+  }
+  const prices = [...new Set(rows.map((r) => r.price || 0))];
+  if (!rows.length) return { ok: false, price: null, reason: "Belum ada template yang tampil di booth." };
+  if (prices.length > 1) return { ok: false, price: null, reason: `Harga template yang tampil berbeda-beda (${prices.sort((a, b) => a - b).map((p) => "Rp " + p.toLocaleString("id-ID")).join(", ")}).` };
+  if (!(prices[0] > 0)) return { ok: false, price: null, reason: "Template yang tampil gratis / belum diberi harga." };
+  return { ok: true, price: prices[0], reason: null };
+}
+
 // ---------- DISKON KASIR (promo otomatis + kode diskon dari menu Promo kasir) ----------
 // Hanya jalan kalau internet & kasir terjangkau (QRIS aktif) dan admin menyalakannya. Harga SELALU dihitung kasir, bukan browser.
 // Kasir mati/lambat: tanpa kode -> harga normal; dengan kode -> ditolak dengan pesan jelas (jangan diam-diam menagih penuh).
@@ -1510,12 +1562,13 @@ const discountView = (q) => ({ enabled: q.enabled !== false, unreachable: !!q.un
   auto: q.auto ? { name: q.auto.name, discount: q.auto.discount } : null, code: q.code ? { code: q.code.code, name: q.code.name, discount: q.code.discount } : null });
 app.post("/api/discount/quote", async (req, res) => {
   discountFails = discountFails.filter((t) => Date.now() - t < 60000);
-  const code = String(req.body?.code ?? "").trim().toUpperCase().slice(0, 40);
+  const code = normCode(req.body?.code);
   if (code && discountFails.length >= 10) return res.status(429).json({ enabled: true, ok: false, error: "Terlalu banyak percobaan. Tunggu sebentar atau minta bantuan kasir." });
   const pay = await paymentState();
   if (!pay.methods.includes("qris")) return res.json({ enabled: false });
   const mode = ["gif", "boomerang", "video"].includes(req.body?.mode) ? req.body.mode : null;
-  const gross = mode ? settingsStore.load().general.modes[mode]?.price || 0 : priceFor(typeof req.body?.templateId === "string" ? req.body.templateId : null, "photo");
+  const flat = req.body?.flat === true && !mode;
+  const gross = mode ? settingsStore.load().general.modes[mode]?.price || 0 : flat ? flatPriceInfo().price || 0 : priceFor(typeof req.body?.templateId === "string" ? req.body.templateId : null, "photo");
   if (!(gross > 0)) return res.json({ enabled: false });
   const q = await discountFor(gross, code);
   if (code && q.enabled && (q.ok === false || q.unreachable)) discountFails.push(Date.now());
@@ -1543,7 +1596,7 @@ app.post("/api/voucher/validate", async (req, res) => {
   const pay = await paymentState();
   if (!pay.methods.includes("voucher")) return fail("Pembayaran voucher sedang tidak aktif.");
 
-  const code = String(req.body?.code ?? "").trim().toUpperCase();
+  const code = normCode(req.body?.code);
   const row = code ? db.prepare("SELECT * FROM vouchers WHERE code = ?").get(code) : null;
   if (!row) return fail("Kode voucher tidak ditemukan.");
   const status = voucherStatus(row);
@@ -1563,7 +1616,8 @@ app.post("/api/voucher/validate", async (req, res) => {
   try {
     const tplId = typeof req.body?.templateId === "string" ? req.body.templateId : null;
     const mode = ["photo", "gif", "boomerang", "video"].includes(req.body?.mode) ? req.body.mode : "photo";
-    const amount = settingsStore.load().payment.cloud.countVoucherRevenue ? priceFor(tplId, mode) : 0;
+    const flatP = req.body?.flat === true && mode === "photo" && !tplId ? flatPriceInfo().price || 0 : 0;
+    const amount = settingsStore.load().payment.cloud.countVoucherRevenue ? flatP || priceFor(tplId, mode) : 0;
     orderNo = cloud.create({ method: "voucher", mode, templateId: tplId, amount, status: "paid", voucherCode: code, voucherRef: row.reference });
   } catch (err) { console.warn("[kasir-sync] Gagal mencatat transaksi voucher:", err.message); }
   res.json({ valid: true, orderNo });
@@ -1621,8 +1675,21 @@ app.post("/api/integration/vouchers/:code/void", requireApiKey, (req, res) => {
 
 const SAFE_ID = /^[A-Za-z0-9_-]{1,64}$/;
 const DATA_IMG = /^data:image\/(png|jpeg);base64,([A-Za-z0-9+/=]+)$/;
-// Kunci unggah per sesi (di memori): hanya pemilik sesi yang boleh menambahkan GIF/video ke sesinya.
-const sessionKeys = new Map();
+// Kunci unggah per sesi: hanya pemilik sesi yang boleh menambahkan GIF/video/klip ke sesinya.
+// Disimpan di DATABASE (bukan memori) supaya restart aplikasi di tengah sesi tidak membuat unggahan GIF / Live / klip yang menyusul ditolak.
+db.exec("CREATE TABLE IF NOT EXISTS session_upload_keys (session_id TEXT PRIMARY KEY, key TEXT NOT NULL, until INTEGER NOT NULL)");
+const sessionKeys = {
+  get(id) { const r = db.prepare("SELECT key, until FROM session_upload_keys WHERE session_id = ?").get(String(id)); return r ? { key: r.key, until: Number(r.until) } : undefined; },
+  set(id, v) { db.prepare("INSERT OR REPLACE INTO session_upload_keys (session_id, key, until) VALUES (?, ?, ?)").run(String(id), String(v.key), Number(v.until)); },
+};
+const pruneSessionKeys = () => { try { db.prepare("DELETE FROM session_upload_keys WHERE until < ?").run(Date.now() - 24 * 3600 * 1000); } catch { /* abaikan */ } };
+pruneSessionKeys(); setInterval(pruneSessionKeys, 3600 * 1000).unref();
+// Penolakan unggahan dicatat (dengan id sesi + alasan) supaya kasus "GIF / klip tidak ada" bisa dilacak dari log
+const rejectUpload = (res, what, id, k, key) => {
+  const why = !k ? "kunci sesi tidak ditemukan" : k.key !== key ? "kunci tidak cocok" : "kunci kedaluwarsa";
+  console.warn(`[upload] ${what} DITOLAK sesi ${String(id).slice(0, 40)}: ${why}`);
+  return res.status(403).json({ error: "Kunci sesi tidak valid / kedaluwarsa." });
+};
 const publicFileUrl = (p) => (p ? `http://${config.publicHost}:${config.port}${p}` : null);
 
 /** Salin hasil ke folder ekspor real-time (flashdisk / folder cloud) kalau diaktifkan admin. Gagal = dicatat saja, tidak menggagalkan sesi. */
@@ -1700,7 +1767,7 @@ app.post("/api/session/shots", express.json({ limit: "100mb" }), (req, res) => {
   const { sessionId, key, offset, shots } = req.body ?? {};
   const id = String(sessionId ?? "");
   const k = SAFE_ID.test(id) ? sessionKeys.get(id) : null;
-  if (!k || k.key !== key || k.until < Date.now()) return res.status(403).json({ error: "Kunci sesi tidak valid / kedaluwarsa." });
+  if (!k || k.key !== key || k.until < Date.now()) return rejectUpload(res, "foto mentah", id, k, key);
   const off = Math.max(0, Math.min(39, Number(offset) || 0));
   let saved = 0;
   try { saved = saveRawShots(id, localDate(), shots, off); } catch (e) { console.error("[output] Gagal simpan foto mentah:", e.message); return res.status(500).json({ error: "Gagal menyimpan foto mentah." }); }
@@ -1800,7 +1867,7 @@ app.post("/api/session/media", express.raw({ type: () => true, limit: "300mb" })
   if (isExisting) {
     id = String(req.query.sessionId);
     const k = sessionKeys.get(id);
-    if (!k || k.key !== req.query.key || k.until < Date.now()) return res.status(403).json({ error: "Kunci sesi tidak valid / kedaluwarsa." });
+    if (!k || k.key !== req.query.key || k.until < Date.now()) return rejectUpload(res, "GIF/Live", id, k, req.query.key);
     key = k.key;
   } else {
     if (!modeCfg?.enabled) return res.status(403).json({ error: "Mode ini tidak aktif." });
@@ -1846,7 +1913,7 @@ const CLIP_TYPES = {
 app.post("/api/session/clip", express.raw({ type: () => true, limit: "60mb" }), (req, res) => {
   const id = String(req.query.sessionId ?? "");
   const k = SAFE_ID.test(id) ? sessionKeys.get(id) : null;
-  if (!k || k.key !== req.query.key || k.until < Date.now()) return res.status(403).json({ error: "Kunci sesi tidak valid / kedaluwarsa." });
+  if (!k || k.key !== req.query.key || k.until < Date.now()) return rejectUpload(res, "klip", id, k, req.query.key);
   if (settingsStore.load().result?.live === false) return res.status(403).json({ error: "Fitur Live dimatikan di pengaturan." });
   const mime = String(req.headers["content-type"] ?? "").split(";")[0].trim();
   const spec = CLIP_TYPES[mime];
@@ -1883,7 +1950,7 @@ app.post("/api/session/clip", express.raw({ type: () => true, limit: "60mb" }), 
 });
 
 // Halaman unduh /s/<token> (+ files.json, all.zip)
-require("./cameraBridge").mount(app, { settingsStore });
+require("./cameraBridge").mount(app, { settingsStore, remoteTools: (t, f) => require("./remoteAgent").registerTool(t, f), sessionActive: () => require("./remoteAgent").sessionActive() });
 require("./sharePage").mount(app, { db, backendDir: config.dataDir, getStoreName: () => settingsStore.load().event?.name || db.prepare("SELECT store_name FROM store_settings WHERE id = 1").get()?.store_name || "WENEVA" });
 
 // ---------- PAYMENT (QRIS via Midtrans) ----------
@@ -1894,7 +1961,8 @@ app.post("/api/payment/qris", async (req, res) => {
   const { templateId, mode } = req.body ?? {};
   const isPrint = req.body?.kind === "print"; // Add Print: bayar cetakan tambahan di akhir sesi
   const modeKey = ["gif", "boomerang", "video"].includes(mode) ? mode : null;
-  if (!isPrint && !modeKey && !templateId) return res.status(400).json({ error: "templateId wajib diisi." });
+  const flat = req.body?.flat === true && !isPrint && !modeKey && !templateId; // bayar dulu, template dipilih sesudahnya
+  if (!isPrint && !modeKey && !templateId && !flat) return res.status(400).json({ error: "templateId wajib diisi." });
 
   // Tolak kalau QRIS tidak aktif / internet mati — mencegah "gratis" lewat simulasi tak sengaja
   const pay = await paymentState();
@@ -1916,6 +1984,10 @@ app.post("/api/payment/qris", async (req, res) => {
     if (!cfg.enabled) return res.status(403).json({ error: "Mode ini tidak aktif." });
     grossAmount = cfg.price || 0;
     if (grossAmount <= 0) return res.status(400).json({ error: "Mode ini gratis / belum diberi harga." });
+  } else if (flat) {
+    const fp = flatPriceInfo();
+    if (!fp.ok) return res.status(409).json({ error: `Alur "bayar dulu" tidak bisa dipakai: ${fp.reason} Samakan harga template atau ubah urutan langkah.` });
+    grossAmount = fp.price;
   } else {
     const template = db.prepare("SELECT * FROM templates WHERE id = ?").get(templateId);
     if (!template) return res.status(404).json({ error: "Template tidak ditemukan" });
@@ -1927,7 +1999,7 @@ app.post("/api/payment/qris", async (req, res) => {
   }
   // Diskon kasir (promo otomatis + kode): dihitung ulang di sini, jadi tidak bisa dipalsukan dari layar. Add Print tidak diskon.
   let promo = null;
-  const wantCode = String(req.body?.discountCode ?? "").trim().toUpperCase().slice(0, 40);
+  const wantCode = normCode(req.body?.discountCode);
   if (!isPrint) {
     const dq = await discountFor(grossAmount, wantCode);
     if (dq.enabled && wantCode && (dq.unreachable || dq.ok === false)) {
@@ -2072,6 +2144,40 @@ app.post("/api/cloud/sync", requirePerm("payment.gateway"), async (req, res) => 
   res.json({ ...r, status: cloud.status() });
 });
 cloud.start();
+// Remote Booth (opsional, mati kalau belum diatur): sambung KELUAR ke server weneva-remote. Lihat remoteAgent.js.
+const remoteAgent = require("./remoteAgent");
+remoteAgent.mount(app, requirePerm);
+// Alat yang boleh dipanggil dari Remote Booth (daftar tetap, dicek lagi oleh remoteSpec.validateTool)
+remoteAgent.registerTool("tools.storage", (p) => ({ ok: true, message: "Penyimpanan dibaca", data: getStorage(!!p.fresh) }));
+remoteAgent.registerTool("tools.archive_cleanup", (p) => {
+  const r = archiveCleanup(p.days);
+  if (r.error) return { ok: false, error: r.error };
+  logActivity("remote", "storage.archive-cleanup", "arsip foto lama", { lebihTuaDariHari: r.days, hariDihapus: r.removedDays, bytes: r.freedBytes });
+  return { ok: true, message: `${r.removedDays} folder tanggal dihapus (${(r.freedBytes / 1048576).toFixed(1)} MB)` + (r.failed ? `, ${r.failed} gagal` : ""), data: r };
+});
+remoteAgent.registerTool("logs.read", async (p) => {
+  const appLog = require("./appLog");
+  const r = await appLog.readLog({ date: p.date, level: p.level, tail: p.tail, from: p.from, to: p.to, q: p.q });
+  if (r.error) return { ok: false, error: r.error };
+  let activity = [];
+  if (p.activity) {
+    try {
+      const [y, m, d] = r.date.split("-").map(Number), a0 = new Date(y, m - 1, d), a1 = new Date(y, m - 1, d + 1);
+      const hm = (iso) => { const t = new Date(iso); return `${String(t.getHours()).padStart(2, "0")}:${String(t.getMinutes()).padStart(2, "0")}`; };
+      activity = db.prepare("SELECT at, username, action, target, detail FROM activity_log WHERE at >= ? AND at < ? ORDER BY at ASC LIMIT 300").all(a0.toISOString(), a1.toISOString())
+        .map((x) => ({ t: hm(x.at), user: x.username || "", action: x.action, target: x.target || "", detail: appLog.redact(x.detail || "").slice(0, 200) }))
+        .filter((x) => (!p.from || x.t >= p.from) && (!p.to || x.t <= p.to) && (!p.q || JSON.stringify(x).toLowerCase().includes(p.q.toLowerCase())));
+    } catch { /* tabel aktivitas tidak terbaca: log file tetap dikirim */ }
+  }
+  if (JSON.stringify(r).length + JSON.stringify(activity).length > 380000) activity = []; // batas kirim ke Remote 400 KB
+  return { ok: true, message: `${r.shown} baris log ${r.date}${r.truncated ? " (dipotong, persempit jam / cari)" : ""}`, data: { ...r, activity } };
+});
+remoteAgent.registerTool("tools.cleanup_orphans", () => {
+  const r = cleanupOrphanedFiles();
+  logActivity("remote", "files.cleanup", "file tidak terpakai", { dihapus: r.deletedCount });
+  return { ok: true, message: `${r.deletedCount} file tidak terpakai dihapus` + (r.skipped ? `, ${r.skipped} dilewati` : ""), data: r };
+});
+remoteAgent.start();
 
 // ---------- WENEVA Galeri: unggah hasil sesi ke cloud + halaman QR (Pengaturan > Pembayaran) ----------
 app.get("/api/gallery/status", requirePerm("payment.gateway"), (req, res) => res.json(gallery.status()));

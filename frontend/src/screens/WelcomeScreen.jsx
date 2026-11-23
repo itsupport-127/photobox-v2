@@ -4,7 +4,7 @@ import { useKiosk } from "../hooks/useKiosk";
 import LiveView from "../components/LiveView";
 import useCamera from "../hooks/useCamera";
 import WelcomeDecor from "../components/WelcomeDecor";
-import logo from "../assets/logo-weneva.png";
+import BrandLogo from "../components/BrandLogo";
 import useShape from "../hooks/useShape";
 
 const MODES = [
@@ -114,7 +114,7 @@ export default function WelcomeScreen({ dispatch, settings, camera, singleTempla
         <div className="hero-stack" style={{ top: U(stackTop), height: U(stackH), flexDirection: land ? "row" : "column", gap: U(P(44, 26, 30)) }}>
           <span className="hero-word" style={{ fontSize: U(wordFs) }}>{w1}</span>
           <div className="hero-pill" style={{ width: U(pillW), height: U(pillH) }}>
-            <img src={logo} alt={title} draggable={false} className="select-none" style={{ height: U(pillH * 0.6) }} />
+            <BrandLogo alt={title} draggable={false} className="select-none" style={{ height: U(pillH * 0.6) }} />
           </div>
           {w2 && <span className="hero-word" style={{ fontSize: U(wordFs) }}>{w2}</span>}
         </div>

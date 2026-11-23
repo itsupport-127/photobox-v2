@@ -26,7 +26,7 @@ export const STATES = {
   TEMPLATE_CATEGORY: "TEMPLATE_CATEGORY",
   TEMPLATE_SELECT: "TEMPLATE_SELECT",
   PAYMENT: "PAYMENT",
-  EMAIL: "EMAIL",                 // input email (opsional) untuk menerima tautan foto, setelah bayar & sebelum pengingat
+  EMAIL: "EMAIL",                 // input email (opsional) untuk menerima tautan foto (langkah "email" di Admin > Alur)
   REMINDER: "REMINDER",           // layar pengingat setelah bayar, sebelum sesi (Admin > Tampilan)
   PHOTO_SESSION: "PHOTO_SESSION",
   MEDIA_CAPTURE: "MEDIA_CAPTURE", // sesi GIF / Boomerang / Video
@@ -69,24 +69,86 @@ export function createInitialSession() {
 
 const cfgNow = () => appConfig.settings ?? {};
 
-/** Setelah pembayaran: tampilkan layar pengingat dulu (kalau diaktifkan), baru sesi. */
-function nextAfterEmail(mode) {
-  if (cfgNow().display?.reminder?.enabled) return STATES.REMINDER;
-  return mode === "photo" ? STATES.PHOTO_SESSION : STATES.MEDIA_CAPTURE;
-}
-function nextAfterPayment(mode) {
-  if (cfgNow().email?.enabled) return STATES.EMAIL; // tanya email untuk tautan foto dulu
-  if (cfgNow().display?.reminder?.enabled) return STATES.REMINDER;
-  return mode === "photo" ? STATES.PHOTO_SESSION : STATES.MEDIA_CAPTURE;
+// ---------- MESIN URUTAN LANGKAH ----------
+// Urutan langkah setelah Start bisa disusun admin (Admin > Alur). Langkah yang bisa dipindah:
+//   disclaimer · template (kategori + pilih) · payment · email · reminder
+// Sesudah langkah terakhir selalu masuk sesi foto/media; Foto -> Editor -> Hasil tetap berurutan (saling bergantung).
+export const FLOW_STEPS = ["disclaimer", "template", "payment", "email", "reminder"];
+export const DEFAULT_FLOW = FLOW_STEPS;
+const STEP_STATE = { disclaimer: STATES.DISCLAIMER, template: STATES.TEMPLATE_CATEGORY, payment: STATES.PAYMENT, email: STATES.EMAIL, reminder: STATES.REMINDER };
+
+/** Urutan dari pengaturan (selalu permutasi lengkap dari 5 langkah). */
+function configuredSteps() {
+  const given = cfgNow().flow?.steps ?? cfgNow().general?.flow?.steps;
+  const seen = new Set();
+  const ok = (Array.isArray(given) ? given : []).filter((x) => FLOW_STEPS.includes(x) && !seen.has(x) && seen.add(x));
+  return [...ok, ...FLOW_STEPS.filter((x) => !seen.has(x))];
 }
 
-/** Masuk alur sesuai mode: foto -> pilih template / bayar; mode lain -> bayar (atau langsung jalan kalau gratis). */
-function enterFlow(s) {
-  if (s.mode === "photo") {
-    return s.selectedTemplate ? { ...s, state: STATES.PAYMENT, paymentStatus: "idle" } : { ...s, state: STATES.TEMPLATE_CATEGORY };
+/** Boleh "bayar dulu" (bayar sebelum pilih template)? Hanya kalau server menyatakan semua template yang tampil sama harganya. */
+export function flatPrice() {
+  const pf = cfgNow().flow?.payFirst;
+  return pf?.ok && pf.price > 0 ? pf.price : null;
+}
+
+/** Sesi foto yang urutannya bayar dulu: bayar sebelum pilih template, dengan harga tetap per sesi. */
+export function isPayFirst(s) {
+  if (s.mode !== "photo" || s.autoTemplate) return false;
+  const o = configuredSteps();
+  return o.indexOf("payment") < o.indexOf("template") && flatPrice() != null;
+}
+
+/** Urutan langkah yang berlaku untuk sesi ini (sudah menerapkan aturan bayar-dulu). */
+function effectiveOrder(s) {
+  const o = configuredSteps();
+  if (s.mode === "photo" && !s.autoTemplate && o.indexOf("payment") < o.indexOf("template") && flatPrice() == null) {
+    // bayar dulu tidak mungkin (harga template berbeda-beda): bayar tetap sesudah pilih template
+    const rest = o.filter((x) => x !== "payment");
+    rest.splice(rest.indexOf("template") + 1, 0, "payment");
+    return rest;
   }
-  if (s.price > 0) return { ...s, state: STATES.PAYMENT, paymentStatus: "idle" };
-  return { ...s, paymentMethod: "free", paymentStatus: "paid", sessionId: crypto.randomUUID(), state: nextAfterPayment(s.mode) };
+  return o;
+}
+
+function stepApplies(step, s) {
+  const c = cfgNow();
+  switch (step) {
+    case "disclaimer": return !!c.general?.disclaimer?.enabled;
+    case "template": return s.mode === "photo" && !s.autoTemplate;
+    case "payment": return s.mode === "photo" || s.price > 0;
+    case "email": return !!c.email?.enabled;
+    case "reminder": return !!c.display?.reminder?.enabled;
+    default: return false;
+  }
+}
+
+/** Langkah yang tampil untuk sesi ini, berurutan. */
+export function flowPlan(s) { return effectiveOrder(s).filter((x) => stepApplies(x, s)); }
+
+/** Langkah sebelum `step` (atau null kalau pertama). Dipakai tombol Kembali di layar bayar. */
+export function previousStep(s, step) {
+  const plan = flowPlan(s);
+  const i = plan.indexOf(step);
+  return i > 0 ? plan[i - 1] : null;
+}
+
+const captureState = (s) => (s.mode === "photo" ? STATES.PHOTO_SESSION : STATES.MEDIA_CAPTURE);
+
+/** Masuk ke langkah `step` (atau sesi, kalau tidak ada langkah lagi). */
+function enterStep(s, step) {
+  if (!step) return { ...s, state: captureState(s) };
+  if (step === "payment") return { ...s, state: STATES.PAYMENT, paymentStatus: "idle" };
+  return { ...s, state: STEP_STATE[step] };
+}
+
+/** Pindah ke langkah berikutnya sesudah `from` ("start" = baru menekan Start). */
+function advance(s, from) {
+  let cur = s;
+  // Mode non-foto gratis: tidak ada layar bayar, tapi sesi tetap perlu id & status lunas.
+  if (cur.mode !== "photo" && !(cur.price > 0) && cur.paymentStatus !== "paid") cur = { ...cur, paymentMethod: "free", paymentStatus: "paid", sessionId: cur.sessionId ?? crypto.randomUUID() };
+  const plan = flowPlan(cur);
+  const i = from === "start" ? -1 : plan.indexOf(from);
+  return enterStep(cur, plan[i + 1] ?? null);
 }
 
 // Reducer-style transition function.
@@ -122,10 +184,9 @@ export function sessionReducer(session, action) {
       };
       // Pilihan awal Mirror/No Mirror untuk sesi foto mengikuti Admin > Kamera > Mirror Image (tamu bisa mengubahnya)
       base.editorState = { ...base.editorState, mirror: !!cfg.camera?.liveView?.mirror };
-      if (cfg.general?.disclaimer?.enabled) return { ...base, state: STATES.DISCLAIMER };
-      return enterFlow(base);
+      return advance(base, "start");
     }
-    case "DISCLAIMER_ACCEPT": return enterFlow(session);
+    case "DISCLAIMER_ACCEPT": return advance(session, "disclaimer");
     case "DISCLAIMER_DECLINE":
     case "CANCEL_SESSION": return createInitialSession();
     case "MERGE": return { ...session, ...action.payload }; // pembaruan data internal (mis. kunci unggah)
@@ -161,13 +222,10 @@ export function sessionReducer(session, action) {
         state: STATES.TEMPLATE_CATEGORY,
       };
     }
-    case "GO_TO_PAYMENT": {
+    case "GO_TO_PAYMENT": // nama lama; sekarang = "template selesai, lanjut ke langkah berikutnya" (bisa bayar, atau langsung sesi kalau bayar dulu)
+    case "TEMPLATE_DONE": {
       if (!session.selectedTemplate) return session; // guard: harus pilih template dulu
-      return {
-        ...session,
-        state: STATES.PAYMENT,
-        paymentStatus: "idle",
-      };
+      return advance(session, "template");
     }
 
     // ---------- PAYMENT ----------
@@ -179,12 +237,12 @@ export function sessionReducer(session, action) {
       };
     }
     case "PAYMENT_SUCCESS": {
-      return {
+      const paid = {
         ...session,
         paymentStatus: "paid",
-        state: nextAfterPayment(session.mode),
         sessionId: action.payload?.sessionId ?? crypto.randomUUID(),
       };
+      return advance(paid, "payment");
     }
     case "PAYMENT_EXPIRED": {
       return { ...session, paymentStatus: "expired" };
@@ -199,12 +257,10 @@ export function sessionReducer(session, action) {
     }
 
     // ---------- EMAIL (opsional) ----------
-    case "EMAIL_DONE": return { ...session, email: action.payload?.email || null, state: nextAfterEmail(session.mode) };
+    case "EMAIL_DONE": return advance({ ...session, email: action.payload?.email || null }, "email");
 
     // ---------- REMINDER ----------
-    case "REMINDER_DONE": {
-      return { ...session, state: session.mode === "photo" ? STATES.PHOTO_SESSION : STATES.MEDIA_CAPTURE };
-    }
+    case "REMINDER_DONE": return advance(session, "reminder");
 
     // ---------- MEDIA_CAPTURE (GIF / Boomerang / Video) ----------
     case "MEDIA_DONE": {
@@ -332,6 +388,13 @@ export function sessionReducer(session, action) {
       return { ...session, editorState: { ...session.editorState, stickers: session.editorState.stickers.filter((st) => st.id !== action.payload.id) } };
     }
     case "FINISH_EDITOR": {
+      // Waktu habis (autofill): slot template yang masih kosong diisi foto yang belum terpakai, urut dari yang pertama. Tanpa ini hasil akhir berlubang.
+      if (action.payload?.autofill) {
+        const arr = templateSlots(session);
+        const used = new Set(arr.filter((i) => i != null));
+        const rest = session.shots.map((_, i) => i).filter((i) => !used.has(i));
+        return { ...session, state: STATES.RESULT, photosForTemplate: arr.map((v) => (v == null ? (rest.shift() ?? null) : v)) };
+      }
       return { ...session, state: STATES.RESULT };
     }
 

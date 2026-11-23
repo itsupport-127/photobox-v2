@@ -59,7 +59,7 @@ function httpGet(urlStr, timeout) {
   });
 }
 
-function mount(app, { settingsStore }) {
+function mount(app, { settingsStore, remoteTools, sessionActive }) {
   const wait = (ms) => new Promise((r) => setTimeout(r, ms));
   const cfg = () => {
     const d = settingsStore.load().camera?.dslr ?? {};
@@ -71,11 +71,24 @@ function mount(app, { settingsStore }) {
   // Gagal menerapkan tidak boleh menggagalkan live / jepret: cukup dicatat.
   // Satu jalur antrean: pergantian profil dari live view dan dari jepret tidak boleh berjalan bersamaan (balasan kamera bisa tertukar).
   let expQ = Promise.resolve();
+  // Jadwal otomatis: kalau aktif & jam sekarang masuk satu periode (boleh melewati tengah malam), profil periode itu dipakai menggantikan profil dasar.
+  function activePeriod() {
+    const sch = settingsStore.load().camera?.exposureSchedule;
+    if (!sch?.enabled || !Array.isArray(sch.periods)) return null;
+    const d = new Date(), m = d.getHours() * 60 + d.getMinutes();
+    const mins = (t) => { const [h, mm] = String(t).split(":").map(Number); return h * 60 + mm; };
+    return sch.periods.find((p) => { const a = mins(p.from), z = mins(p.to); return a === z ? false : a < z ? m >= a && m < z : m >= a || m < z; }) || null;
+  }
+  function activeExposure() {
+    const base = settingsStore.load().camera?.exposure;
+    const p = activePeriod();
+    return p ? { split: true, live: { ...(base?.live || {}), ...(p.live || {}) }, photo: { ...(base?.photo || {}), ...(p.photo || {}) } } : base;
+  }
   function applyExposure(b, which) {
     const job = expQ.then(async () => {
       try {
         if (!b || !b.native) return;
-        const ex = settingsStore.load().camera?.exposure;
+        const ex = activeExposure();
         if (!ex?.split) { b.profile = ""; return; }
         const prof = ex[which] || {};
         b.expApplied = b.expApplied || {}; b.expErrors = b.expErrors || {};
@@ -256,6 +269,10 @@ function mount(app, { settingsStore }) {
           const nikonSettle = !!b.native && capturing === 0 && captureEndedAt > 0; // Nikon & Canon: keduanya menyalakan live view sendiri setelah jepret
           if (nikonSettle && !b.lvOn && (b.lastFrameAt || 0) > captureEndedAt) b.lvOn = true;
           const settling = nikonSettle && !b.lvOn && now - captureEndedAt < 2500;
+          // Jadwal: ganti periode (mis. masuk jam malam) -> terapkan setelan baru di sela sesi, tidak pernah saat jepret
+          const sk = activePeriod()?.id || "";
+          if (b.schedKey === undefined) b.schedKey = sk;
+          else if (sk !== b.schedKey && capturing === 0 && !settling && b.lvOn) { b.schedKey = sk; log("jadwal kamera: periode", sk || "(dasar)"); await applyExposure(b, b.profile || "live"); viewBump = Date.now(); if (!alive) break; }
           if (b.profile === "photo" && capturing === 0 && !settling && now - lastProfile > 1500) { lastProfile = now; await applyExposure(b, "live"); viewBump = Date.now(); if (!alive) break; }
           if (!b.lvOn && now - lastStart > 2000 && capturing === 0 && !settling) { lastStart = now; await applyExposure(b, "live"); if (!alive) break; b.send("LIVEVIEW_START"); viewBump = Date.now(); }
           const f = b.readFrameIfNew();
@@ -373,6 +390,27 @@ function mount(app, { settingsStore }) {
       res.json({ ok: true, info: r.info });
     } catch (e) { res.status(502).json({ error: e.message }); }
   });
+
+  // Alat Remote Booth: status kamera + baca/ubah ISO, shutter, aperture, WB (hanya Canon/Nikon langsung)
+  if (remoteTools) {
+    remoteTools("camera.status", () => { const c = cfg(); return { ok: true, message: "Kamera dibaca", data: { driver: c.driver, model: c.model || null, live: !!lvOn, capturing: capturing > 0 } }; });
+    remoteTools("camera.exposure.get", async () => {
+      const n = nativeFor(); if (n.err) return { ok: false, error: n.err };
+      if (capturing > 0 || (sessionActive && sessionActive())) return { ok: false, error: "Ada sesi foto yang sedang berjalan; membaca kamera ditunda sampai sesi selesai." };
+      const info = await n.b.camInfo(n.c.model); if (info?.error) return { ok: false, error: info.error };
+      return { ok: true, message: "Setelan kamera dibaca", data: info };
+    });
+    remoteTools("camera.exposure.set", async (p) => {
+      const n = nativeFor(); if (n.err) return { ok: false, error: n.err };
+      // Mengganti ISO saat tamu berfoto membuat kamera 'DeviceBusy' / live view mati: tolak, dan jalankan lewat antrean yang sama dengan profil jadwal
+      if (capturing > 0 || (sessionActive && sessionActive())) return { ok: false, error: "Ada sesi foto yang sedang berjalan. Ubah setelan kamera setelah sesi selesai (booth di layar awal)." };
+      const job = expQ.then(() => n.b.camSet(n.c.model, p.prop, p.value));
+      expQ = job.catch(() => {});
+      const r = await job;
+      if (r.ok && n.b.expApplied) delete n.b.expApplied[p.prop];
+      return r.ok ? { ok: true, message: "Setelan kamera diubah", data: r.info || null } : { ok: false, error: r.error || "Ditolak kamera" };
+    });
+  }
 
   let busy = Promise.resolve();
   app.post("/api/camera/dslr/capture", (req, res) => {

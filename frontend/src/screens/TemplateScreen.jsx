@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from "react";
 import TemplatePreview from "../components/TemplatePreview";
 import useCategories from "../hooks/useCategories";
 import TemplateDecor from "../components/TemplateDecor";
-import logo from "../assets/logo-weneva.png";
+import BrandLogo from "../components/BrandLogo";
 import StepBadge from "../components/StepBadge";
 import useShape from "../hooks/useShape";
 import GroupIcon from "../components/GroupIcon";
@@ -104,7 +104,7 @@ function TemplateList({ session, dispatch, templates, category, skipCategory }) 
     <div className="kiosk-screen strip-screen h-full w-full overflow-hidden" data-shape={shape}>
       <TemplateDecor />
       <div className="strip-stage">
-        <img src={logo} alt="Weneva" draggable={false} className="strip-logo" style={{ left: U(L.logo.left), top: U(L.logo.top), width: U(L.logo.width) }} />
+        <BrandLogo draggable={false} className="strip-logo" style={{ left: U(L.logo.left), top: U(L.logo.top), width: U(L.logo.width) }} />
 
         <div className="strip-panel" style={{ left: U(L.panel.left), top: U(L.panel.top), width: U(L.panel.width), height: U(L.panel.height) }} />
         <div className="strip-tray" style={{ left: U(L.tray.left), top: U(L.tray.top), width: U(L.tray.width), height: U(L.tray.height), borderRadius: U(L.tray.r) }}>
@@ -150,7 +150,7 @@ function TemplateList({ session, dispatch, templates, category, skipCategory }) 
 
         <button onClick={() => dispatch({ type: skipCategory ? "CANCEL_SESSION" : "BACK_TO_CATEGORY" })} className="strip-btn strip-btn--back" style={{ left: U(L.back.left), top: U(L.back.top), width: U(192), height: U(63), fontSize: U(30), padding: 0 }}>BACK</button>
         {selectedTemplate && (
-          <button onClick={() => dispatch({ type: "GO_TO_PAYMENT" })} className="strip-btn strip-btn--next" style={{ left: U(L.next.left), top: U(L.next.top), width: U(192), height: U(63), fontSize: U(30) }}>NEXT →</button>
+          <button onClick={() => dispatch({ type: "TEMPLATE_DONE" })} className="strip-btn strip-btn--next" style={{ left: U(L.next.left), top: U(L.next.top), width: U(192), height: U(63), fontSize: U(30) }}>NEXT →</button>
         )}
       </div>
     </div>

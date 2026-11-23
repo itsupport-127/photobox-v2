@@ -1,4 +1,4 @@
-import logo from "../assets/logo-weneva.png";
+import BrandLogo from "../components/BrandLogo";
 import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { Link, NavLink, Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import { logout, can, refreshMe, recordLogout } from "../services/authService";
@@ -14,6 +14,8 @@ import AccountPage from "./AccountPage";
 import ActivityPage from "./ActivityPage";
 import FiltersPage from "./FiltersPage";
 import ReadyCheckPage from "./ReadyCheckPage";
+import RemotePage from "./RemotePage";
+import FlowPage from "./FlowPage";
 import { Icon } from "./editorKit";
 import { StatusDot } from "./ui";
 
@@ -32,9 +34,11 @@ export const MODE_LABEL = {
 const NAV = [
   { to: "/admin/settings", icon: "gear", label: "Pengaturan", perm: ["settings.manage"] },
   { to: "/admin/template", icon: "image", label: "Template", perm: ["template.manage"] },
+  { to: "/admin/flow", icon: "refresh", label: "Alur", perm: ["settings.manage"] },
   { to: "/admin/filters", icon: "eye", label: "Filter", perm: ["settings.manage"] },
   { to: "/admin/check", icon: "wrench", label: "Cek Siap Buka", perm: ["settings.manage"] },
   { to: "/admin/payment", icon: "wallet", label: "Pembayaran", perm: ["payment.mode", "payment.gateway"] },
+  { to: "/admin/remote", icon: "gear", label: "Remote", perm: ["settings.manage"] },
   { to: "/admin/tools", icon: "wrench", label: "Tools", perm: ["tools.maintenance"] },
   { to: "/admin/activity", icon: "history", label: "Log", perm: ["activity.view"] },
 ];
@@ -77,7 +81,7 @@ export default function AdminApp({ user: initialUser, onLogout }) {
                 className="flex items-center gap-1 px-3 py-2 bg-white border-b border-[#D5DCE4] shadow-[0_2px_10px_rgba(24,27,35,0.06)] overflow-x-auto overflow-y-hidden [&>*]:shrink-0 [scrollbar-width:thin]"
                 onWheel={(e) => { if (e.deltaY && !e.deltaX) e.currentTarget.scrollLeft += e.deltaY; }}
               >
-                <img src={logo} alt="Weneva" className="h-11 w-auto mr-3 select-none" draggable={false} />
+                <BrandLogo className="h-11 w-auto mr-3 select-none" draggable={false} />
                 <Link to="/admin" className="flex flex-col items-center gap-1 px-3 py-1 text-[12px] text-[#262A38] hover:text-[#E02843]">
                   <Icon name="home" size={26} /> Menu
                 </Link>
@@ -122,6 +126,8 @@ export default function AdminApp({ user: initialUser, onLogout }) {
                   <Route path="payment" element={guard(<PaymentPage user={user} />, "payment.mode", "payment.gateway")} />
                   <Route path="settings" element={guard(<SettingsPage />, "settings.manage")} />
                   <Route path="tools/camera" element={guard(<CameraSettingsPage />, "settings.manage")} />
+                  <Route path="flow" element={guard(<FlowPage />, "settings.manage")} />
+                  <Route path="remote" element={guard(<RemotePage />, "settings.manage")} />
                   <Route path="tools" element={guard(<ToolsPage />, "tools.maintenance")} />
                   <Route path="users" element={guard(<UsersPage user={user} />, "users.manage")} />
                   <Route path="activity" element={guard(<ActivityPage />, "activity.view")} />

@@ -3,6 +3,7 @@ import { API_BASE, getAdminSettings, regeneratePosApiKey, saveAdminSettings, get
 import { useOverview } from "./AdminApp";
 import { can } from "../services/authService";
 import PaymentModeCard from "./PaymentModeCard";
+import RemoteCard from "./RemoteCard";
 import { inputCls, Field, NumInput } from "./editorKit";
 import { Btn, Card, Notice, Page, Toggle, useSavedFlag } from "./ui";
 import { copyText } from "./clipboard";
@@ -184,7 +185,7 @@ function CloudCard({ cloud, onSaved }) {
 
   const STATUS = { paid: ["Lunas", "text-emerald-700"], pending: ["Menunggu", "text-[#6B7684]"], failed: ["Gagal", "text-red-600"], expired: ["Kedaluwarsa", "text-[#6B7684]"] };
   return (
-    <Card title="KASIR ONLINE (SINKRON TRANSAKSI)" hint="Kirim riwayat transaksi ke aplikasi kasir. Nomor transaksi dibuat di booth dan sama persis di kasir. Booth tetap jalan tanpa internet; yang belum terkirim dikirim otomatis nanti.">
+    <Card title="PLATFORM: RIWAYAT TRANSAKSI" hint="Kirim riwayat transaksi ke aplikasi kasir. Nomor transaksi dibuat di booth dan sama persis di kasir. Booth tetap jalan tanpa internet; yang belum terkirim dikirim otomatis nanti.">
       <Toggle checked={f.enabled} onChange={(v) => setF({ ...f, enabled: v })} label="Kirim transaksi ke kasir" />
       <div className="grid grid-cols-2 gap-3 mt-3">
         <Field label="Alamat kasir"><input className={inputCls} placeholder="https://kasir.contoh.com" value={f.url} onChange={(e) => setF({ ...f, url: e.target.value })} /></Field>
@@ -259,7 +260,7 @@ function GalleryCard({ cloud, onSaved }) {
     reload(); setBusy(false);
   }
   return (
-    <Card title="GALERI CLOUD (QR KE WEBSITE)" hint="QR di layar hasil membuka halaman web WENEVA: hasil template di atas, foto mentah & klip di bawah. File disimpan di cloud (bukan di PC booth), dikirim di latar belakang & dilanjutkan otomatis kalau internet putus.">
+    <Card title="PLATFORM: GALERI (QR KE WEBSITE)" hint="QR di layar hasil membuka halaman web WENEVA: hasil template di atas, foto mentah & klip di bawah. File disimpan di cloud (bukan di PC booth), dikirim di latar belakang & dilanjutkan otomatis kalau internet putus.">
       <Toggle checked={f.galleryEnabled} onChange={(v) => setF({ ...f, galleryEnabled: v })} label="Pakai galeri cloud untuk QR download" />
       <div className="grid grid-cols-2 gap-3 mt-3">
         <Field label="Alamat galeri"><input className={inputCls} placeholder="https://foto.domainanda.com" value={f.galleryUrl} onChange={(e) => setF({ ...f, galleryUrl: e.target.value })} /></Field>
@@ -341,6 +342,7 @@ function GalleryArchive({ ready }) {
           )}
         </div>
       )}
+      {can("settings.manage") && <RemoteCard />}
     </div>
   );
 }

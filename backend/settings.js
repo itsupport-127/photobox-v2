@@ -4,6 +4,7 @@
 // timer sesi, dan API key buat integrasi aplikasi kasir.
 // ==========================================================
 const crypto = require("crypto");
+const FLOW_STEPS = ["disclaimer", "template", "payment", "email", "reminder"];
 const db = require("./db");
 
 const DEFAULTS = {
@@ -24,6 +25,10 @@ const DEFAULTS = {
     virtualKeyboard: "builtin", // off = keyboard fisik / bawaan perangkat | builtin = keyboard layar WENEVA | windows = keyboard sentuh Windows (dibuka otomatis di aplikasi desktop)
     security: { pinHash: "", pinSalt: "", pinSeeded: false, pinDefault: false }, // PIN keluar dari layar penuh; disimpan ter-hash
     // Izin sosmed: tamu ditanya setelah bayar (sebelum pengumuman). Jawaban menandai folder sesi (BOLEH / TIDAK) untuk content creator.
+    // Urutan langkah setelah tamu menekan Start. Boleh disusun bebas (lihat FLOW_STEPS). "payment" sebelum "template" = bayar dulu
+    // (hanya berlaku kalau semua template yang tampil harganya sama; kalau tidak, bayar tetap setelah pilih template).
+    flow: { steps: ["disclaimer", "template", "payment", "email", "reminder"] },
+    rawFilter: false, // true = filter pilihan tamu ikut dipasang ke file foto mentah (bawaan: mentah polos)
     consent: { enabled: false, title: "IZIN FOTO", text: "Hai kak! Fotonya boleh kami bagikan di sosmed atau dipajang di mading toko? Pilih yang kakak nyaman ya.", seconds: 20 },
     disclaimer: {
       enabled: false,
@@ -76,6 +81,7 @@ const DEFAULTS = {
     dslr: { host: "http://localhost:5513", camera: "", driver: "digicam", model: "", zModel: "" }, // DSLR via digiCamControl (web server lokal)
     orientation: "auto", // auto = ikut gambar kamera | landscape | portrait (kamera dipasang tegak: gambar otomatis diputar 90°)
     liveSource: "camera", // mode DSLR: sumber tampilan live view. camera = live view dari kamera (USB, lewat program perantara) | webcam = webcam / capture card HDMI (lebih cepat, tanpa delay); foto tetap dari DSLR
+    exposureSchedule: { enabled: false, periods: [] }, // Jadwal otomatis ganti setelan kamera per jam (siang / malam): tiap periode = jam mulai-selesai + profil live & foto
     exposure: { split: false, live: {}, photo: {} }, // Setelan Kamera (Canon/Nikon langsung): split = ISO / shutter / aperture / WB Live View dan Foto dipisah. Nilai = kode pilihan kamera (angka)
     photoLight: { auto: false, target: 120, maxPct: 40 }, // Auto cahaya FOTO (terpisah dari live view): geser kecerahan hasil jepret ke target (0-255), koreksi maks %
     liveView: { clipRotation: 0, enabled: true, mirror: true, rotation: 0, displayOnStart: false, guide: true, fitTemplate: false, frameMode: "camera", thumbMode: "ratio", brightness: 100, autoBright: true, canonAutoExposure: false, canonBoost: 3, asIs: false, contrast: 100, saturation: 100, warmth: 0, filterId: "" },
@@ -84,6 +90,7 @@ const DEFAULTS = {
   // ---- EDITOR: filter foto yang bisa ditambah admin (No Filter selalu ada di urutan pertama) ----
   // p = parameter CSS/canvas filter: brightness/contrast/saturate (100 = normal), grayscale/sepia (0-100), hue (derajat), blur (px)
   editor: {
+    showNoFilter: true, // tombol "No Filter" (foto asli) di layar tamu
     filters: [
       { id: "bw", label: "Black & White", enabled: true, p: { brightness: 100, contrast: 105, saturate: 100, grayscale: 100, sepia: 0, hue: 0, blur: 0 } },
       { id: "f1", label: "Filter 1", enabled: true, p: { brightness: 105, contrast: 100, saturate: 115, grayscale: 0, sepia: 35, hue: 0, blur: 0 } },
@@ -98,6 +105,8 @@ const DEFAULTS = {
     autoFullscreen: true,   // klik Start / tombol layar penuh = masuk layar penuh (seperti F11)
     startFullscreen: true,  // aplikasi desktop (.exe) dibuka dalam layar penuh
     colors: { background: "#17171A", primary: "#FF5F45", buttonText: "#17171A", secondary: "#FFFDF9" }, // tema Krem: tinta / koral / tinta (teks tombol) / kertas
+    // Merek di dalam aplikasi: logo (gambar unggahan, "" = logo WENEVA bawaan) dan nama (judul jendela, teks alternatif logo, header admin)
+    brand: { logo: "", name: "WENEVA" },
     startScreen: {
       image: "", stretch: "cover", // cover | contain | fill | center
       templateChoice: "favorites", // favorites (hanya template favorit/live yang tampil; sisanya Draft) | single
@@ -347,6 +356,12 @@ function update(patch) {
       header: str(dis.header, 120, cg.disclaimer.header),
       text: str(dis.text, 3000, cg.disclaimer.text),
     };
+    {
+      const seen = new Set();
+      const given = (Array.isArray(obj(g.flow).steps) ? obj(g.flow).steps : []).map((x) => (x === "consent" ? "email" : x)).filter((x) => FLOW_STEPS.includes(x) && !seen.has(x) && seen.add(x));
+      ng.flow = { steps: [...given, ...cg.flow.steps.filter((x) => !seen.has(x))] }; // langkah yang hilang ditambahkan di belakang: tidak pernah ada langkah terlewat
+    }
+    ng.rawFilter = bool(g.rawFilter, cg.rawFilter);
     const cs = obj(g.consent);
     ng.consent = { enabled: bool(cs.enabled, cg.consent.enabled), title: str(cs.title, 40, cg.consent.title) || cg.consent.title, text: str(cs.text, 200, cg.consent.text) || cg.consent.text, seconds: num(cs.seconds, 5, 120, cg.consent.seconds) };
     const ex = obj(g.export);
@@ -392,6 +407,13 @@ function update(patch) {
       autoTrigger: bool(c.autoTrigger, cc.autoTrigger),
       photoLight: (() => { const o = obj(c.photoLight), d = cc.photoLight ?? { auto: false, target: 120, maxPct: 40 }; return { auto: bool(o.auto, d.auto), target: num(o.target, 60, 200, d.target), maxPct: num(o.maxPct, 0, 100, d.maxPct) }; })(),
       liveSource: pick(c.liveSource, ["camera", "webcam"], cc.liveSource ?? "camera"),
+      exposureSchedule: (() => {
+        const o = obj(c.exposureSchedule), d = cc.exposureSchedule ?? { enabled: false, periods: [] };
+        const hhmm = (v, fb) => (/^([01]\d|2[0-3]):[0-5]\d$/.test(String(v)) ? String(v) : fb);
+        const prof = (v) => { const x = obj(v), out = {}; for (const k of ["iso", "av", "tv", "wb"]) if (x[k] !== undefined && x[k] !== null && /^\d{1,10}$/.test(String(x[k]))) out[k] = String(x[k]); return out; };
+        const periods = Array.isArray(o.periods) ? o.periods.slice(0, 6).filter(isObj).map((q, i) => ({ id: typeof q.id === "string" && /^[\w-]{1,24}$/.test(q.id) ? q.id : `p${i + 1}`, label: str(q.label, 24, `Periode ${i + 1}`) || `Periode ${i + 1}`, from: hhmm(q.from, "06:00"), to: hhmm(q.to, "18:00"), live: prof(q.live), photo: prof(q.photo) })) : d.periods;
+        return { enabled: bool(o.enabled, d.enabled), periods };
+      })(),
       exposure: (() => {
         const e = obj(c.exposure), ce = cc.exposure ?? { split: false, live: {}, photo: {} };
         const prof = (v, cv) => { const o = obj(v), out = {}; for (const k of ["iso", "av", "tv", "wb"]) { const x = o[k] === undefined ? cv?.[k] : o[k]; if (x !== undefined && x !== null && /^\d{1,10}$/.test(String(x))) out[k] = String(x); } return out; };
@@ -437,6 +459,11 @@ function update(patch) {
     nd.colors = {
       background: hex(col.background, cd.colors.background), primary: hex(col.primary, cd.colors.primary),
       buttonText: hex(col.buttonText, cd.colors.buttonText), secondary: hex(col.secondary, cd.colors.secondary),
+    };
+    const br = obj(d.brand), cbr = cd.brand;
+    nd.brand = {
+      logo: br.logo === undefined ? cbr.logo : upath(br.logo, cbr.logo),
+      name: br.name === undefined ? cbr.name : (str(br.name, 40, cbr.name).trim() || "WENEVA"), // kosong = kembali ke WENEVA
     };
     const ss = obj(d.startScreen), css = cd.startScreen;
     nd.startScreen = {
@@ -547,7 +574,7 @@ function update(patch) {
   if (isObj(p.editor) && Array.isArray(p.editor.filters)) {
     const seen = new Set(["none"]);
     const list = [];
-    for (const f of p.editor.filters.slice(0, 24)) {
+    for (const f of p.editor.filters.slice(0, 150)) {
       if (!isObj(f)) continue;
       const id = typeof f.id === "string" && /^[\w-]{1,24}$/.test(f.id) ? f.id : null;
       if (!id || seen.has(id)) continue;
@@ -559,6 +586,7 @@ function update(patch) {
       list.push({
         id,
         label: str(f.label, 24, "Filter") || "Filter",
+        category: str(f.category, 24, ""), // kategori (tab di layar tamu); kosong = tanpa kategori
         enabled: bool(f.enabled, true),
         ...(lut ? { lut } : {}),
         p: {
@@ -567,7 +595,7 @@ function update(patch) {
         },
       });
     }
-    next.editor = { filters: list };
+    next.editor = { filters: list, showNoFilter: bool(p.editor.showNoFilter, cur.editor?.showNoFilter ?? true) };
   }
 
   if (isObj(p.payment)) {
